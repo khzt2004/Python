@@ -1,0 +1,18 @@
+
+# Import it as 'pd'
+import pandas as pd
+from pandas import ExcelWriter
+from ggplot import ggplot, aes, geom_bar
+
+# Create a dataframe
+xls_file = pd.read_csv('India_Adwords.csv')
+df=pd.DataFrame(xls_file)
+df.head()
+SLCountry = df[df['Source'].str.contains('ptr', case=False)]
+writer = ExcelWriter('IndiaOutput.xlsx')
+df.to_excel(writer,'Sheet1')
+SLCountry.to_excel(writer, 'Sheet2')
+writer.save()
+
+
+# Find this tutorial helpful?  Checkout the blue sidebar for more tutorials!
