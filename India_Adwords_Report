@@ -1,11 +1,16 @@
 
-# Import it as 'pd'
+# Import pandas module as 'pd'
 import pandas as pd
 from pandas import ExcelWriter
 from ggplot import ggplot, aes, geom_bar
 
 # Create a dataframe
 xls_file = pd.read_csv('India_Adwords.csv')
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
 df=pd.DataFrame(xls_file)
 df.head()
 SLCountry = df[df['Source'].str.contains('ptr', case=False)]
@@ -13,6 +18,3 @@ writer = ExcelWriter('IndiaOutput.xlsx')
 df.to_excel(writer,'Sheet1')
 SLCountry.to_excel(writer, 'Sheet2')
 writer.save()
-
-
-# Find this tutorial helpful?  Checkout the blue sidebar for more tutorials!
