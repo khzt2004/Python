@@ -2,11 +2,9 @@
 # Import pandas module as 'pd'
 import pandas as pd
 from pandas import ExcelWriter
-import datetime
 
 # Create a dataframe
 # specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
-today = datetime.datetime.now().strftime ("%m%d%Y")
 target_file = r'aseanoutput.xlsx'
 xls_file = pd.read_excel(target_file)
 # xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
@@ -17,7 +15,7 @@ xls_file = pd.read_excel(target_file)
 df=pd.DataFrame(xls_file)
 df.head()
 SLCountry = df[df['link'].str.contains('jobstreet.vn', case=False)]
-writer = ExcelWriter('IndiaOutput_' + today + '.xlsx')
+writer = ExcelWriter('IndiaOutput.xlsx')
 df.to_excel(writer,'Sheet1')
 SLCountry.to_excel(writer, 'Sheet2')
 writer.save()
