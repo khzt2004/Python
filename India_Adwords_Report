@@ -1,23 +1,58 @@
 
 # Import pandas module as 'pd'
 import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
 from pandas import ExcelWriter
-import datetime
+from ggplot import ggplot, aes, geom_bar
 
 # Create a dataframe
-# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
-today = datetime.datetime.now().strftime ("%m%d%Y")
-target_file = r'aseanoutput.xlsx'
-xls_file = pd.read_excel(target_file)
-# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
-# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
-# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
-# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
-# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+xls_file = pd.read_csv('India_Adwords.csv')
+# xlrd.xldate.xldate_as_datetime(xls_file['Date Sent'], 0)
 df=pd.DataFrame(xls_file)
+pd.to_datetime(df['Date Sent'], errors='coerce', dayfirst=True, infer_datetime_format=True)
+pd.to_datetime(df['Created Date'])
+pd.to_datetime(df['Account Created'])
+pd.to_datetime(df['Contact Created'])
+pd.to_datetime(df['Last Updated'])
+# ensure that month and day is correct - need to verify
+# pd.DatetimeIndex(df['Date Sent']).day
+sort_date = df[df['Date Sent']>='10-Aug-2016']
+df.rename(columns = lambda x: x.replace(' ', '_').lower(), inplace=True)
 df.head()
-SLCountry = df[df['link'].str.contains('jobstreet.vn', case=False)]
-writer = ExcelWriter('IndiaOutput_' + today + '.xlsx')
+df.sort('date_sent')
+q = """
+    SELECT
+        *
+    FROM
+        df
+    WHERE
+        df.Organization IN('Designers Choice',
+        'Tech Savvy Engineers Private Ltd.',
+        'Acecam Pvt. Ltd.'
+        )
+    AND
+        df.date_sent > '13/8/16';"""
+
+LeadTypeTable = sqldf(q, globals())
+
+q1 = """
+    SELECT
+        *
+    FROM
+        df
+    WHERE
+        df.Organization IN('Designers Choice',
+        'Tech Savvy Engineers Private Ltd.',
+        'Acecam Pvt. Ltd.'
+        );"""
+
+TestLeadTypeTable = sqldf(q1, globals())
+
+SLCountry = df[df['Source'].str.contains('ptr', case=False)]
+writer = ExcelWriter('IndiaOutput.xlsx')
 df.to_excel(writer,'Sheet1')
 SLCountry.to_excel(writer, 'Sheet2')
 writer.save()
