@@ -1,0 +1,32 @@
+
+# Import pandas module as 'pd'
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file = r'aseanoutput.xlsx'
+xls_file = pd.read_excel(target_file)
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+df=pd.DataFrame(xls_file)
+df.head()
+
+df.loc[df['link'].str.contains("com.sg") == True,'Country'] = 'Singapore'
+df.loc[df['link'].str.contains("com.my") == True ,'Country'] = 'Malaysia'
+df.loc[df['link'].str.contains("co.id") == True ,'Country'] = 'Indonesia'
+df.loc[df['link'].str.contains("com.ph") == True ,'Country'] = 'Philippines'
+df.loc[df['link'].str.contains("jobstreet.vn") == True ,'Country'] = 'Vietnam'
+
+SLCountry = df[df['link'].str.contains('jobstreet.vn', case=False)]
+writer = ExcelWriter('IndiaOutput.xlsx')
+df.to_excel(writer,'Sheet1')
+SLCountry.to_excel(writer, 'Sheet2')
+writer.save()
