@@ -1,0 +1,54 @@
+# Import pandas module as 'pd'
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+today = datetime.now().strftime ("%m%d%Y")
+xls_file = pd.read_excel('India_Adwords.xlsx')
+# xlrd.xldate.xldate_as_datetime(xls_file['Date Sent'], 0)
+df=pd.DataFrame(xls_file)
+# pd.to_datetime(df['Date Sent'], errors='coerce', dayfirst=True, infer_datetime_format=True)
+# pd.to_datetime(df['Created Date'])
+# pd.to_datetime(df['Account Created'])
+# pd.to_datetime(df['Contact Created'])
+# pd.to_datetime(df['Last Updated'])
+# ensure that month and day is correct - need to verify
+# pd.DatetimeIndex(df['Date Sent']).day
+# if we need to filter by date: sort_date = df[df['Date Sent']>='10-Aug-2016']
+# if we need to change column name to small letters and underscore: df.rename(columns = lambda x: x.replace(' ', '_').lower(), inplace=True)
+# if we need to sort by date: df.sort('date_sent')
+df.head()
+q = """
+    SELECT
+        *
+    FROM
+        df
+    WHERE
+        df.Organization IN("Best Engineering Aids & Consultancies Pvt. Ltd."
+     )
+    AND
+        df.Source LIKE ('%google%');"""
+
+LeadTypeTable = sqldf(q, globals())
+
+q1 = """
+    SELECT
+        *
+    FROM
+        df
+    WHERE
+        df.Source LIKE ('%google%');"""
+
+All_VAR = sqldf(q1, globals())
+
+# SLCountry = df[df['Source'].str.contains('ptr', case=False)]
+writer = ExcelWriter('IndiaOutput_' + today + '.xlsx')
+LeadTypeTable.to_excel(writer,'Filtered_VARs')
+All_VAR.to_excel(writer, 'ALL_VARs')
+writer.save()
+
