@@ -45,6 +45,45 @@ df.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]], axis=1, inplace=True)
 T1 = pd.merge(df1, df, on='CSN', how='inner')
 T1.sort('CSN', ascending=1)
 
+# match zip codes against lookup tables if necessary
+raw_data = {'From': [1000, 2001, 3001, 4001, 5001], 
+        'To': [2000, 3000, 4000, 5000, 6000],
+    'State': ['A', 'B', 'C', 'D', 'E']
+}
+zipcodes = pd.DataFrame(raw_data, columns = ['From', 'To', 'State'])
+
+# Create a list to store the data
+State = []
+
+# For each row in the column,
+# for row in df_zip['Zipcode']:
+    # if more than a value,
+    # if row >= zipcodes['From'][4]:
+        # Append a letter grade
+        # State.append(zipcodes['State'][4])
+    # else, if more than a value,
+    # elif row >= zipcodes['From'][3]:
+        # Append a letter grade
+        # State.append(zipcodes['State'][3])
+    # else, if more than a value,
+    # elif row >= zipcodes['From'][2]:
+        # Append a letter grade
+        # State.append(zipcodes['State'][2])
+    # else, if more than a value,
+    # elif row >= zipcodes['From'][1]:
+        # Append a letter grade
+        # State.append(zipcodes['State'][1])
+    # elif row >= zipcodes['From'][0]:
+        # Append a letter grade
+        # State.append(zipcodes['State'][0])
+    # otherwise,
+    # else:
+        # Append a failing grade
+        # State.append('not in range')
+
+# Create a column from the list
+# df_zip['AU State'] = State
+
 # attach rate by country
 T1_country=T1[["Country","SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby(["Country"]).sum()
 T1_country
@@ -123,4 +162,3 @@ T1_country.to_excel(writer,'Breakdown by Country')
 T1_VAR.to_excel(writer, 'Breakdown by VAR')
 MP.to_excel(writer, 'MP Penetration')
 writer.save()
-
