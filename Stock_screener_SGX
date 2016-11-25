@@ -1,0 +1,42 @@
+# http://nbviewer.jupyter.org/github/QuantEcon/QuantEcon.applications/blob/master/pandas/pandas_solutions.ipynb
+# http://investexcel.net/all-yahoo-finance-stock-tickers/
+
+import numpy as np
+import pandas as pd
+import datetime as dt
+from pandas_datareader import data,wb
+import matplotlib.pyplot as plt
+
+import csv
+
+csvfile = csv.reader(open("SGX.csv"))
+stocklist = dict(csvfile)
+
+# format of ticker_list = {'INTC': 'Intel',
+#               'MSFT': 'Microsoft',
+#               'SNE': 'Sony',
+#               'PTR': 'PetroChina'}
+
+ticker_list = stocklist
+
+# datetime format is year, month, day
+start = dt.datetime(2016, 3, 1)
+end = dt.datetime.today()
+
+price_change = {}
+
+for ticker in ticker_list:
+    prices = data.DataReader(ticker, 'yahoo', start, end)
+    closing_prices = prices['Close']
+    change = 100 * (closing_prices[-1] - closing_prices[0]) / closing_prices[0]
+    name = ticker_list[ticker]
+    price_change[name] = change
+
+pc = pd.Series(price_change)
+pc.sort_values(inplace=True)
+df = pd.DataFrame(pc)
+df.index.rename('Stock', inplace=True)
+df.columns = ['% change']
+
+# fig, ax = plt.subplots(figsize=(10,8))
+# pc.plot(kind='bar', ax=ax)
