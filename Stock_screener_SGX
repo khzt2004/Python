@@ -1,14 +1,18 @@
 # http://nbviewer.jupyter.org/github/QuantEcon/QuantEcon.applications/blob/master/pandas/pandas_solutions.ipynb
 # http://investexcel.net/all-yahoo-finance-stock-tickers/
+# to do: use interactive viz or table, seaborn, plotly
+# latest stock list for SG: githhub SGX.csv
 
 import numpy as np
 import pandas as pd
 import datetime as dt
 from pandas_datareader import data,wb
 import matplotlib.pyplot as plt
+from pandas import ExcelWriter
 
 import csv
 
+today = dt.datetime.now().strftime ("%m%d%Y")
 csvfile = csv.reader(open("SGX.csv"))
 stocklist = dict(csvfile)
 
@@ -20,7 +24,7 @@ stocklist = dict(csvfile)
 ticker_list = stocklist
 
 # datetime format is year, month, day
-start = dt.datetime(2016, 3, 1)
+start = dt.datetime(2016, 11, 1)
 end = dt.datetime.today()
 
 price_change = {}
@@ -40,3 +44,7 @@ df.columns = ['% change']
 
 # fig, ax = plt.subplots(figsize=(10,8))
 # pc.plot(kind='bar', ax=ax)
+print df
+writer = ExcelWriter('df_' + today + '.xlsx')
+df.to_excel(writer,'Sheet1')
+writer.save()
