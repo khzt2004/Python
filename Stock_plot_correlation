@@ -5,6 +5,8 @@
 
 %matplotlib inline
 import numpy as np
+import cufflinks as cf
+import plotly.tools as tls
 import pandas as pd
 import seaborn
 import datetime as dt
@@ -12,9 +14,12 @@ from pandas_datareader import data,wb
 import pandas_datareader.data as web
 import matplotlib.pyplot as plt
 from pandas import ExcelWriter
+import plotly.plotly as py
+import plotly
 
 import csv
-
+plotly.tools.set_credentials_file('khzt2004', 'JjgiCvzDTei4tZERVQL4')
+py.sign_in('khzt2004', 'JjgiCvzDTei4tZERVQL4')
 today = dt.datetime.now().strftime ("%m%d%Y")
 
 # format of ticker_list = {'INTC': 'Intel',
@@ -22,7 +27,7 @@ today = dt.datetime.now().strftime ("%m%d%Y")
 #               'SNE': 'Sony',
 #               'PTR': 'PetroChina'}
 
-ticker_list = ['OV8.SI','S58.SI', 'AVV.SI', 'Y92.SI', '^STI', '^IXIC', '^GSPC']
+ticker_list = ['OV8.SI','S58.SI', 'AVV.SI', 'Y92.SI']
 
 # datetime format is year, month, day
 start = dt.datetime(2016, 1, 1)
@@ -31,6 +36,9 @@ end = dt.datetime.today()
 stockprice = web.get_data_yahoo(ticker_list, start, end)['Adj Close']
 stockprice[ticker_list].plot(grid = True, figsize=(16, 10))
 plt.show
+stockprice.iplot()
+stockprice.iplot(subplots=True, subplot_titles=True, legend=False)
+
 corr_df = stockprice.corr(method='pearson')
 
 print("--------------- CREATE A HEATMAP ---------------")
