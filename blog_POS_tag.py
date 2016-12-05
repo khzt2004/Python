@@ -22,7 +22,7 @@ _tokens = tokenizer.tokenize(r)
 english_stopwords = stopwords.words('english')    # get english stop words
 tokens = [t for t in _tokens if t.lower() not in english_stopwords]
 
- # Process lexical diversity
+# Process lexical diversity
 st = len(set(tokens))
 lt = len(tokens)
 y = [st*100/lt]
