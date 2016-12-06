@@ -2,14 +2,36 @@
 
 import pafy
 import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandas import ExcelWriter
+from numbers import Number
+import matplotlib.pyplot as plt
 
-url_list = ['fM9QlHNt8vQ', 'CHfkG084bbM']
-url = "http://www.youtube.com/watch?v=fM9QlHNt8vQ"
+url_list = ['rymAn415IFc', 'm10NXanodz8', 'jESL86TFj48', 'fhVfKsOQe6k', 'H93JVcLns-M', '41YwoayGaOE', 'PUsFIY1fzec', 'rnPogip-SEY', 'TaIYstvFTNk', 'mWiovP79wyY', 'bapKDxdFn6c', '3nS0ZSyUOzs']
+# url = "http://www.youtube.com/watch?v=fM9QlHNt8vQ"
 
 # create a video instance
 
+data = []
+for url in url_list:
+    video = pafy.new(url)
+    data.append({'title': video.title, 'author': video.author, 'id': video.videoid, 'duration': video.duration,
+    'rating': video.rating, 'views': video.viewcount, 'thumbnail': video.thumb, 'published date': video.published,
+    'category': video.category, 'description': video.description, 'keywords': video.keywords
+    })
 
-video = pafy.new(url_list[i])
+df = pd.DataFrame(data)
+print(df)
+    
+writer = ExcelWriter('youtubeChannelOutput.xlsx')
+df.to_excel(writer,'youtubeOutput')
+writer.save()
+
+# need to define plotting settings
+df['views'].plot(grid = True, figsize=(16, 10))
+
 
 # get certain attributes
 
@@ -29,15 +51,6 @@ print("------------------")
 print(video)
 print("\n")
 
-cols = ['title', 'author', 'length', 'rating', 'views', 'thumbnail']
-df = pd.DataFrame(columns=cols)
-df['title'] = [video.title]
-df['author'] = [video.author]
-df['id'] = [video.videoid]
-df['length'] = [video.length]
-df['rating'] = [video.rating]
-df['views'] = [video.viewcount]
-df['thumbnail'] = [video.thumb]
 
 
 
