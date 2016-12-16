@@ -1,0 +1,129 @@
+# Import pandas module as 'pd'
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+from numbers import Number
+
+def as_percent(v, precision='0.2'):  
+    """Convert number to percentage string."""
+    if isinstance(v, Number):
+        return "{{:{}%}}".format(precision).format(v)
+    else:
+        raise TypeError("Numeric type required")
+
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file1 = r'APS_Output.xlsx'
+xls_file1 = pd.read_excel(target_file1)
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+df1=pd.DataFrame(xls_file1)
+df1.head()
+
+df1['Created month'] = df1['Created'].dt.strftime('%b')
+
+
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file = r'Ref_Selling.xlsx'
+xls_file = pd.read_excel(target_file)
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+df=pd.DataFrame(xls_file)
+df.head()
+df.rename(columns={
+    'ROW_ID' : 'CSN'
+  },
+  inplace=True
+)
+df.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]], axis=1, inplace=True)
+T1 = pd.merge(df1, df, on='CSN', how='inner')
+T1.sort('CSN', ascending=1)
+
+# attach rate by country
+T1_country=T1[["Country","SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby(["Country"]).sum()
+T1_country
+T1_country['Sim Attach Rate'] = T1_country['Simulation Total'] / T1_country['SolidWorks Total']
+T1_country['Sim Attach Rate'] = T1_country['Sim Attach Rate'].apply(as_percent)  
+T1_country['EPDM Attach Rate'] = T1_country['PDMEnterprise'] / T1_country['SolidWorks Total']
+T1_country['EPDM Attach Rate'] = T1_country['EPDM Attach Rate'].apply(as_percent)
+T1_country['Composer Attach Rate'] = T1_country['3DVIA Composer'] / T1_country['SolidWorks Total']
+T1_country['Composer Attach Rate'] = T1_country['Composer Attach Rate'].apply(as_percent)
+T1_country['Electrical Attach Rate'] = T1_country['Electrical Total'] / T1_country['SolidWorks Total']
+T1_country['Electrical Attach Rate'] = T1_country['Electrical Attach Rate'].apply(as_percent)
+T1_country['Inspection Attach Rate'] = T1_country['SW Inspection'] / T1_country['SolidWorks Total']
+T1_country['Inspection Attach Rate'] = T1_country['Inspection Attach Rate'].apply(as_percent)
+T1_country = T1_country[["SolidWorks Total", 
+"Simulation Total", "Sim Attach Rate", "PDMEnterprise", "EPDM Attach Rate", 
+"3DVIA Composer", "Composer Attach Rate", "Electrical Total", "Electrical Attach Rate", 
+"SW Inspection", "Inspection Attach Rate"]]
+
+# attach rate by VAR
+
+T1_VAR=T1[["Organization", "SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby("Organization").sum()
+T1_VAR
+T1_VAR['Sim Attach Rate'] = T1_VAR['Simulation Total'] / T1_VAR['SolidWorks Total']
+T1_VAR['Sim Attach Rate'] = T1_VAR['Sim Attach Rate'].apply(as_percent)  
+T1_VAR['EPDM Attach Rate'] = T1_VAR['PDMEnterprise'] / T1_VAR['SolidWorks Total']
+T1_VAR['EPDM Attach Rate'] = T1_VAR['EPDM Attach Rate'].apply(as_percent)
+T1_VAR['Composer Attach Rate'] = T1_VAR['3DVIA Composer'] / T1_VAR['SolidWorks Total']
+T1_VAR['Composer Attach Rate'] = T1_VAR['Composer Attach Rate'].apply(as_percent)
+T1_VAR['Electrical Attach Rate'] = T1_VAR['Electrical Total'] / T1_VAR['SolidWorks Total']
+T1_VAR['Electrical Attach Rate'] = T1_VAR['Electrical Attach Rate'].apply(as_percent)
+T1_VAR['Inspection Attach Rate'] = T1_VAR['SW Inspection'] / T1_VAR['SolidWorks Total']
+T1_VAR['Inspection Attach Rate'] = T1_VAR['Inspection Attach Rate'].apply(as_percent)
+T1_VAR = T1_VAR[["SolidWorks Total", 
+"Simulation Total", "Sim Attach Rate", "PDMEnterprise", "EPDM Attach Rate", 
+"3DVIA Composer", "Composer Attach Rate", "Electrical Total", "Electrical Attach Rate", 
+"SW Inspection", "Inspection Attach Rate"]]
+
+# penetration rate by country
+# count of SW
+swdf = T1[(T1['SolidWorks Total']>=0)]
+sw_g = swdf.groupby('Country')['SolidWorks Total'].count()
+sw_g = pd.DataFrame(sw_g, columns=['SolidWorks Total'])
+
+# count of Sim
+newdf = T1[(T1['Simulation Total']>0)]
+g = newdf.groupby('Country')['Simulation Total'].count()
+g = pd.DataFrame(g, columns=['Simulation Total'])
+
+# count of PDM
+newdfpdm = T1[(T1['PDMEnterprise']>0)]
+g_pdm = newdfpdm.groupby('Country')['PDMEnterprise'].count()
+g_pdm = pd.DataFrame(g_pdm, columns=['PDMEnterprise'])
+
+# count of Composer
+newdfcomposer = T1[(T1['3DVIA Composer']>0)]
+g_composer = newdfcomposer.groupby('Country')['3DVIA Composer'].count()
+g_composer = pd.DataFrame(g_composer, columns=['3DVIA Composer'])
+
+# concatenate all products into one dataframe
+MP = pd.concat([sw_g, g, g_pdm, g_composer], axis=1)
+
+# rename columns
+MP.columns = ['Count of SW', 'Count of Sim', 'Count of EPDM', 'Count of Composer']
+
+# find penetration rate for each product
+MP['Sim Penetration Rate'] = MP['Count of Sim'] / MP['Count of SW']
+MP['Sim Penetration Rate'] = MP['Sim Penetration Rate'].apply(as_percent)
+MP['EPDM Penetration Rate'] = MP['Count of EPDM'] / MP['Count of SW']
+MP['EPDM Penetration Rate'] = MP['EPDM Penetration Rate'].apply(as_percent)
+MP['Composer Penetration Rate'] = MP['Count of Composer'] / MP['Count of SW']
+MP['Composer Penetration Rate'] = MP['Composer Penetration Rate'].apply(as_percent)
+
+writer = ExcelWriter('installbaseOutput.xlsx')
+T1.to_excel(writer,'Full Table')
+T1_country.to_excel(writer,'Breakdown by Country')
+T1_VAR.to_excel(writer, 'Breakdown by VAR')
+MP.to_excel(writer, 'MP Penetration')
+writer.save()
+
