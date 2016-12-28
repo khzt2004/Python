@@ -1,0 +1,338 @@
+# Import pandas module as 'pd'
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+from numbers import Number
+
+def as_percent(v, precision='0.2'):  
+    """Convert number to percentage string."""
+    if isinstance(v, Number):
+        return "{{:{}%}}".format(precision).format(v)
+    else:
+        raise TypeError("Numeric type required")
+
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file1 = r'dec2016_output.xlsx'
+xls_file1 = pd.read_excel(target_file1)
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+T1=pd.DataFrame(xls_file1)
+T1.head()
+T1['Created month'] = T1['Created'].dt.strftime('%b')
+T1.sort('CSN', ascending=1)
+
+# attach rate by country
+T1_country=T1[["Country","SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby(["Country"]).sum()
+T1_country
+T1_country['Sim Attach Rate'] = T1_country['Simulation Total'] / T1_country['SolidWorks Total']
+T1_country['Sim Attach Rate'] = T1_country['Sim Attach Rate'].apply(as_percent)  
+T1_country['EPDM Attach Rate'] = T1_country['PDMEnterprise'] / T1_country['SolidWorks Total']
+T1_country['EPDM Attach Rate'] = T1_country['EPDM Attach Rate'].apply(as_percent)
+T1_country['Composer Attach Rate'] = T1_country['3DVIA Composer'] / T1_country['SolidWorks Total']
+T1_country['Composer Attach Rate'] = T1_country['Composer Attach Rate'].apply(as_percent)
+T1_country['Electrical Attach Rate'] = T1_country['Electrical Total'] / T1_country['SolidWorks Total']
+T1_country['Electrical Attach Rate'] = T1_country['Electrical Attach Rate'].apply(as_percent)
+T1_country['Inspection Attach Rate'] = T1_country['SW Inspection'] / T1_country['SolidWorks Total']
+T1_country['Inspection Attach Rate'] = T1_country['Inspection Attach Rate'].apply(as_percent)
+T1_country = T1_country[["SolidWorks Total", 
+"Simulation Total", "Sim Attach Rate", "PDMEnterprise", "EPDM Attach Rate", 
+"3DVIA Composer", "Composer Attach Rate", "Electrical Total", "Electrical Attach Rate", 
+"SW Inspection", "Inspection Attach Rate"]]
+
+
+# attach rate by VAR
+
+T1_VAR=T1[["Organization", "SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby("Organization").sum()
+T1_VAR
+T1_VAR['Sim Attach Rate'] = T1_VAR['Simulation Total'] / T1_VAR['SolidWorks Total']
+T1_VAR['Sim Attach Rate'] = T1_VAR['Sim Attach Rate'].apply(as_percent)  
+T1_VAR['EPDM Attach Rate'] = T1_VAR['PDMEnterprise'] / T1_VAR['SolidWorks Total']
+T1_VAR['EPDM Attach Rate'] = T1_VAR['EPDM Attach Rate'].apply(as_percent)
+T1_VAR['Composer Attach Rate'] = T1_VAR['3DVIA Composer'] / T1_VAR['SolidWorks Total']
+T1_VAR['Composer Attach Rate'] = T1_VAR['Composer Attach Rate'].apply(as_percent)
+T1_VAR['Electrical Attach Rate'] = T1_VAR['Electrical Total'] / T1_VAR['SolidWorks Total']
+T1_VAR['Electrical Attach Rate'] = T1_VAR['Electrical Attach Rate'].apply(as_percent)
+T1_VAR['Inspection Attach Rate'] = T1_VAR['SW Inspection'] / T1_VAR['SolidWorks Total']
+T1_VAR['Inspection Attach Rate'] = T1_VAR['Inspection Attach Rate'].apply(as_percent)
+T1_VAR = T1_VAR[["SolidWorks Total", 
+"Simulation Total", "Sim Attach Rate", "PDMEnterprise", "EPDM Attach Rate", 
+"3DVIA Composer", "Composer Attach Rate", "Electrical Total", "Electrical Attach Rate", 
+"SW Inspection", "Inspection Attach Rate"]]
+
+# installbase from accounts with 0-2 seats
+T1_0to2seats = T1[(T1['SolidWorks Total']>=0) & (T1['SolidWorks Total']<=2)]
+# attach rate by country
+T1_0to2seats_country=T1_0to2seats[["Country","SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby(["Country"]).sum()
+T1_0to2seats_country
+T1_0to2seats_country['Sim Attach Rate'] = T1_0to2seats_country['Simulation Total'] / T1_0to2seats_country['SolidWorks Total']
+T1_0to2seats_country['Sim Attach Rate'] = T1_0to2seats_country['Sim Attach Rate'].apply(as_percent)  
+T1_0to2seats_country['EPDM Attach Rate'] = T1_0to2seats_country['PDMEnterprise'] / T1_0to2seats_country['SolidWorks Total']
+T1_0to2seats_country['EPDM Attach Rate'] = T1_0to2seats_country['EPDM Attach Rate'].apply(as_percent)
+T1_0to2seats_country['Composer Attach Rate'] = T1_0to2seats_country['3DVIA Composer'] / T1_0to2seats_country['SolidWorks Total']
+T1_0to2seats_country['Composer Attach Rate'] = T1_0to2seats_country['Composer Attach Rate'].apply(as_percent)
+T1_0to2seats_country['Electrical Attach Rate'] = T1_0to2seats_country['Electrical Total'] / T1_0to2seats_country['SolidWorks Total']
+T1_0to2seats_country['Electrical Attach Rate'] = T1_0to2seats_country['Electrical Attach Rate'].apply(as_percent)
+T1_0to2seats_country['Inspection Attach Rate'] = T1_0to2seats_country['SW Inspection'] / T1_0to2seats_country['SolidWorks Total']
+T1_0to2seats_country['Inspection Attach Rate'] = T1_0to2seats_country['Inspection Attach Rate'].apply(as_percent)
+T1_0to2seats_country = T1_0to2seats_country[["SolidWorks Total", 
+"Simulation Total", "Sim Attach Rate", "PDMEnterprise", "EPDM Attach Rate", 
+"3DVIA Composer", "Composer Attach Rate", "Electrical Total", "Electrical Attach Rate", 
+"SW Inspection", "Inspection Attach Rate"]]
+
+# penetration rate by country, 0-2 seats
+# count of SW
+swdf_0_2 = T1_0to2seats[(T1_0to2seats['SolidWorks Total']>=0)]
+sw_g_0_2 = swdf_0_2.groupby('Country')['SolidWorks Total'].count()
+sw_g_0_2 = pd.DataFrame(sw_g_0_2, columns=['SolidWorks Total'])
+
+# count of Sim
+newdf_0_2 = T1_0to2seats[(T1_0to2seats['Simulation Total']>0)]
+g_0_2 = newdf_0_2.groupby('Country')['Simulation Total'].count()
+g_0_2 = pd.DataFrame(g_0_2, columns=['Simulation Total'])
+
+# count of PDM
+newdfpdm_0_2 = T1_0to2seats[(T1_0to2seats['PDMEnterprise']>0)]
+g_pdm_0_2 = newdfpdm_0_2.groupby('Country')['PDMEnterprise'].count()
+g_pdm_0_2 = pd.DataFrame(g_pdm_0_2, columns=['PDMEnterprise'])
+
+# count of Composer
+newdfcomposer_0_2 = T1_0to2seats[(T1_0to2seats['3DVIA Composer']>0)]
+g_composer_0_2 = newdfcomposer_0_2.groupby('Country')['3DVIA Composer'].count()
+g_composer_0_2 = pd.DataFrame(g_composer_0_2, columns=['3DVIA Composer'])
+
+# count of Electrical
+newdfelectrical_0_2 = T1_0to2seats[(T1_0to2seats['Electrical Total']>0)]
+g_electrical_0_2 = newdfelectrical_0_2.groupby('Country')['Electrical Total'].count()
+g_electrical_0_2 = pd.DataFrame(g_electrical_0_2, columns=['Electrical Total'])
+
+# count of Inspection
+newdfinspection_0_2 = T1_0to2seats[(T1_0to2seats['SW Inspection']>0)]
+g_inspection_0_2 = newdfinspection_0_2.groupby('Country')['SW Inspection'].count()
+g_inspection_0_2 = pd.DataFrame(g_inspection_0_2, columns=['SW Inspection'])
+
+# concatenate all products into one dataframe
+MP_0_2 = pd.concat([sw_g_0_2, g_0_2, g_pdm_0_2, g_composer_0_2, g_electrical_0_2, g_inspection_0_2], axis=1)
+
+# rename columns
+MP_0_2.columns = ['Count of SW', 'Count of Sim', 'Count of EPDM', 'Count of Composer', 'Count of Electrical', 'Count of Inspection']
+
+# find penetration rate for each product
+MP_0_2['Sim Penetration Rate'] = MP_0_2['Count of Sim'] / MP_0_2['Count of SW']
+MP_0_2['Sim Penetration Rate'] = MP_0_2['Sim Penetration Rate'].apply(as_percent)
+MP_0_2['EPDM Penetration Rate'] = MP_0_2['Count of EPDM'] / MP_0_2['Count of SW']
+MP_0_2['EPDM Penetration Rate'] = MP_0_2['EPDM Penetration Rate'].apply(as_percent)
+MP_0_2['Composer Penetration Rate'] = MP_0_2['Count of Composer'] / MP_0_2['Count of SW']
+MP_0_2['Composer Penetration Rate'] = MP_0_2['Composer Penetration Rate'].apply(as_percent)
+MP_0_2['Electrical Penetration Rate'] = MP_0_2['Count of Electrical'] / MP_0_2['Count of SW']
+MP_0_2['Electrical Penetration Rate'] = MP_0_2['Electrical Penetration Rate'].apply(as_percent)
+MP_0_2['Inspection Penetration Rate'] = MP_0_2['Count of Inspection'] / MP_0_2['Count of SW']
+MP_0_2['Inspection Penetration Rate'] = MP_0_2['Inspection Penetration Rate'].apply(as_percent)
+
+# installbase from accounts with 3-4 seats
+T1_3to4seats = T1[(T1['SolidWorks Total']>=3) & (T1['SolidWorks Total']<=4)]
+# attach rate by country
+T1_3to4seats_country=T1_3to4seats[["Country","SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby(["Country"]).sum()
+T1_3to4seats_country
+T1_3to4seats_country['Sim Attach Rate'] = T1_3to4seats_country['Simulation Total'] / T1_3to4seats_country['SolidWorks Total']
+T1_3to4seats_country['Sim Attach Rate'] = T1_3to4seats_country['Sim Attach Rate'].apply(as_percent)  
+T1_3to4seats_country['EPDM Attach Rate'] = T1_3to4seats_country['PDMEnterprise'] / T1_3to4seats_country['SolidWorks Total']
+T1_3to4seats_country['EPDM Attach Rate'] = T1_3to4seats_country['EPDM Attach Rate'].apply(as_percent)
+T1_3to4seats_country['Composer Attach Rate'] = T1_3to4seats_country['3DVIA Composer'] / T1_3to4seats_country['SolidWorks Total']
+T1_3to4seats_country['Composer Attach Rate'] = T1_3to4seats_country['Composer Attach Rate'].apply(as_percent)
+T1_3to4seats_country['Electrical Attach Rate'] = T1_3to4seats_country['Electrical Total'] / T1_3to4seats_country['SolidWorks Total']
+T1_3to4seats_country['Electrical Attach Rate'] = T1_3to4seats_country['Electrical Attach Rate'].apply(as_percent)
+T1_3to4seats_country['Inspection Attach Rate'] = T1_3to4seats_country['SW Inspection'] / T1_3to4seats_country['SolidWorks Total']
+T1_3to4seats_country['Inspection Attach Rate'] = T1_3to4seats_country['Inspection Attach Rate'].apply(as_percent)
+T1_3to4seats_country = T1_3to4seats_country[["SolidWorks Total", 
+"Simulation Total", "Sim Attach Rate", "PDMEnterprise", "EPDM Attach Rate", 
+"3DVIA Composer", "Composer Attach Rate", "Electrical Total", "Electrical Attach Rate", 
+"SW Inspection", "Inspection Attach Rate"]]
+
+# penetration rate by country, 3-4 seats
+# count of SW
+swdf_3_4 = T1_3to4seats[(T1_3to4seats['SolidWorks Total']>=0)]
+sw_g_3_4 = swdf_3_4.groupby('Country')['SolidWorks Total'].count()
+sw_g_3_4 = pd.DataFrame(sw_g_3_4, columns=['SolidWorks Total'])
+
+# count of Sim
+newdf_3_4 = T1_3to4seats[(T1_3to4seats['Simulation Total']>0)]
+g_3_4 = newdf_3_4.groupby('Country')['Simulation Total'].count()
+g_3_4 = pd.DataFrame(g_3_4, columns=['Simulation Total'])
+
+# count of PDM
+newdfpdm_3_4 = T1_3to4seats[(T1_3to4seats['PDMEnterprise']>0)]
+g_pdm_3_4 = newdfpdm_3_4.groupby('Country')['PDMEnterprise'].count()
+g_pdm_3_4 = pd.DataFrame(g_pdm_3_4, columns=['PDMEnterprise'])
+
+# count of Composer
+newdfcomposer_3_4 = T1_3to4seats[(T1_3to4seats['3DVIA Composer']>0)]
+g_composer_3_4 = newdfcomposer_3_4.groupby('Country')['3DVIA Composer'].count()
+g_composer_3_4 = pd.DataFrame(g_composer_3_4, columns=['3DVIA Composer'])
+
+# count of Electrical
+newdfElectrical_3_4 = T1_3to4seats[(T1_3to4seats['Electrical Total']>0)]
+g_Electrical_3_4 = newdfElectrical_3_4.groupby('Country')['Electrical Total'].count()
+g_Electrical_3_4 = pd.DataFrame(g_Electrical_3_4, columns=['Electrical Total'])
+
+# count of Inspection
+newdfinspection_3_4 = T1_3to4seats[(T1_3to4seats['SW Inspection']>0)]
+g_inspection_3_4 = newdfinspection_3_4.groupby('Country')['SW Inspection'].count()
+g_inspection_3_4 = pd.DataFrame(g_inspection_3_4, columns=['SW Inspection'])
+
+# concatenate all products into one dataframe
+MP_3_4 = pd.concat([sw_g_3_4, g_3_4, g_pdm_3_4, g_composer_3_4, g_Electrical_3_4, g_inspection_3_4], axis=1)
+
+# rename columns
+MP_3_4.columns = ['Count of SW', 'Count of Sim', 'Count of EPDM', 'Count of Composer', 'Count of Electrical', 'Count of Inspection']
+
+# find penetration rate for each product
+MP_3_4['Sim Penetration Rate'] = MP_3_4['Count of Sim'] / MP_3_4['Count of SW']
+MP_3_4['Sim Penetration Rate'] = MP_3_4['Sim Penetration Rate'].apply(as_percent)
+MP_3_4['EPDM Penetration Rate'] = MP_3_4['Count of EPDM'] / MP_3_4['Count of SW']
+MP_3_4['EPDM Penetration Rate'] = MP_3_4['EPDM Penetration Rate'].apply(as_percent)
+MP_3_4['Composer Penetration Rate'] = MP_3_4['Count of Composer'] / MP_3_4['Count of SW']
+MP_3_4['Composer Penetration Rate'] = MP_3_4['Composer Penetration Rate'].apply(as_percent)
+MP_3_4['Electrical Penetration Rate'] = MP_3_4['Count of Electrical'] / MP_3_4['Count of SW']
+MP_3_4['Electrical Penetration Rate'] = MP_3_4['Electrical Penetration Rate'].apply(as_percent)
+MP_3_4['Inspection Penetration Rate'] = MP_3_4['Count of Inspection'] / MP_3_4['Count of SW']
+MP_3_4['Inspection Penetration Rate'] = MP_3_4['Inspection Penetration Rate'].apply(as_percent)
+
+# installbase from accounts with more than 5 seats
+T1_morethanequal5seats = T1[(T1['SolidWorks Total']>=5)]
+# attach rate by country
+T1_morethanequal5seats_country=T1_morethanequal5seats[["Country","SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby(["Country"]).sum()
+T1_morethanequal5seats_country
+T1_morethanequal5seats_country['Sim Attach Rate'] = T1_morethanequal5seats_country['Simulation Total'] / T1_morethanequal5seats_country['SolidWorks Total']
+T1_morethanequal5seats_country['Sim Attach Rate'] = T1_morethanequal5seats_country['Sim Attach Rate'].apply(as_percent)  
+T1_morethanequal5seats_country['EPDM Attach Rate'] = T1_morethanequal5seats_country['PDMEnterprise'] / T1_morethanequal5seats_country['SolidWorks Total']
+T1_morethanequal5seats_country['EPDM Attach Rate'] = T1_morethanequal5seats_country['EPDM Attach Rate'].apply(as_percent)
+T1_morethanequal5seats_country['Composer Attach Rate'] = T1_morethanequal5seats_country['3DVIA Composer'] / T1_morethanequal5seats_country['SolidWorks Total']
+T1_morethanequal5seats_country['Composer Attach Rate'] = T1_morethanequal5seats_country['Composer Attach Rate'].apply(as_percent)
+T1_morethanequal5seats_country['Electrical Attach Rate'] = T1_morethanequal5seats_country['Electrical Total'] / T1_morethanequal5seats_country['SolidWorks Total']
+T1_morethanequal5seats_country['Electrical Attach Rate'] = T1_morethanequal5seats_country['Electrical Attach Rate'].apply(as_percent)
+T1_morethanequal5seats_country['Inspection Attach Rate'] = T1_morethanequal5seats_country['SW Inspection'] / T1_morethanequal5seats_country['SolidWorks Total']
+T1_morethanequal5seats_country['Inspection Attach Rate'] = T1_morethanequal5seats_country['Inspection Attach Rate'].apply(as_percent)
+T1_morethanequal5seats_country = T1_morethanequal5seats_country[["SolidWorks Total", 
+"Simulation Total", "Sim Attach Rate", "PDMEnterprise", "EPDM Attach Rate", 
+"3DVIA Composer", "Composer Attach Rate", "Electrical Total", "Electrical Attach Rate", 
+"SW Inspection", "Inspection Attach Rate"]]
+
+# penetration rate by country, more than 5 seats
+# count of SW
+swdf_morethanequal5 = T1_morethanequal5seats[(T1_morethanequal5seats['SolidWorks Total']>=0)]
+sw_g_morethanequal5 = swdf_morethanequal5.groupby('Country')['SolidWorks Total'].count()
+sw_g_morethanequal5 = pd.DataFrame(sw_g_morethanequal5, columns=['SolidWorks Total'])
+
+# count of Sim
+newdf_morethanequal5 = T1_morethanequal5seats[(T1_morethanequal5seats['Simulation Total']>0)]
+g_morethanequal5 = newdf_morethanequal5.groupby('Country')['Simulation Total'].count()
+g_morethanequal5 = pd.DataFrame(g_morethanequal5, columns=['Simulation Total'])
+
+# count of PDM
+newdfpdm_morethanequal5 = T1_morethanequal5seats[(T1_morethanequal5seats['PDMEnterprise']>0)]
+g_pdm_morethanequal5 = newdfpdm_morethanequal5.groupby('Country')['PDMEnterprise'].count()
+g_pdm_morethanequal5 = pd.DataFrame(g_pdm_morethanequal5, columns=['PDMEnterprise'])
+
+# count of Composer
+newdfcomposer_morethanequal5 = T1_morethanequal5seats[(T1_morethanequal5seats['3DVIA Composer']>0)]
+g_composer_morethanequal5 = newdfcomposer_morethanequal5.groupby('Country')['3DVIA Composer'].count()
+g_composer_morethanequal5 = pd.DataFrame(g_composer_morethanequal5, columns=['3DVIA Composer'])
+
+# count of Electrical
+newdfelectrical_morethanequal5 = T1_morethanequal5seats[(T1_morethanequal5seats['Electrical Total']>0)]
+g_electrical_morethanequal5 = newdfelectrical_morethanequal5.groupby('Country')['Electrical Total'].count()
+g_electrical_morethanequal5 = pd.DataFrame(g_electrical_morethanequal5, columns=['Electrical Total'])
+
+# count of Inspection
+newdfinspection_morethanequal5 = T1_morethanequal5seats[(T1_morethanequal5seats['SW Inspection']>0)]
+g_inspection_morethanequal5 = newdfinspection_morethanequal5.groupby('Country')['SW Inspection'].count()
+g_inspection_morethanequal5 = pd.DataFrame(g_inspection_morethanequal5, columns=['SW Inspection'])
+
+# concatenate all products into one dataframe
+MP_morethanequal5 = pd.concat([sw_g_morethanequal5, g_morethanequal5, g_pdm_morethanequal5, g_composer_morethanequal5, g_electrical_morethanequal5, g_inspection_morethanequal5], axis=1)
+
+# rename columns
+MP_morethanequal5.columns = ['Count of SW', 'Count of Sim', 'Count of EPDM', 'Count of Composer', 'Count of Electrical', 'Count of Inspection']
+
+# find penetration rate for each product
+MP_morethanequal5['Sim Penetration Rate'] = MP_morethanequal5['Count of Sim'] / MP_morethanequal5['Count of SW']
+MP_morethanequal5['Sim Penetration Rate'] = MP_morethanequal5['Sim Penetration Rate'].apply(as_percent)
+MP_morethanequal5['EPDM Penetration Rate'] = MP_morethanequal5['Count of EPDM'] / MP_morethanequal5['Count of SW']
+MP_morethanequal5['EPDM Penetration Rate'] = MP_morethanequal5['EPDM Penetration Rate'].apply(as_percent)
+MP_morethanequal5['Composer Penetration Rate'] = MP_morethanequal5['Count of Composer'] / MP_morethanequal5['Count of SW']
+MP_morethanequal5['Composer Penetration Rate'] = MP_morethanequal5['Composer Penetration Rate'].apply(as_percent)
+MP_morethanequal5['Electrical Penetration Rate'] = MP_morethanequal5['Count of Electrical'] / MP_morethanequal5['Count of SW']
+MP_morethanequal5['Electrical Penetration Rate'] = MP_morethanequal5['Electrical Penetration Rate'].apply(as_percent)
+MP_morethanequal5['Inspection Penetration Rate'] = MP_morethanequal5['Count of Inspection'] / MP_morethanequal5['Count of SW']
+MP_morethanequal5['Inspection Penetration Rate'] = MP_morethanequal5['Inspection Penetration Rate'].apply(as_percent)
+
+# penetration rate by country
+# count of SW
+swdf = T1[(T1['SolidWorks Total']>=0)]
+sw_g = swdf.groupby('Country')['SolidWorks Total'].count()
+sw_g = pd.DataFrame(sw_g, columns=['SolidWorks Total'])
+
+# count of Sim
+newdf = T1[(T1['Simulation Total']>0)]
+g = newdf.groupby('Country')['Simulation Total'].count()
+g = pd.DataFrame(g, columns=['Simulation Total'])
+
+# count of PDM
+newdfpdm = T1[(T1['PDMEnterprise']>0)]
+g_pdm = newdfpdm.groupby('Country')['PDMEnterprise'].count()
+g_pdm = pd.DataFrame(g_pdm, columns=['PDMEnterprise'])
+
+# count of Composer
+newdfcomposer = T1[(T1['3DVIA Composer']>0)]
+g_composer = newdfcomposer.groupby('Country')['3DVIA Composer'].count()
+g_composer = pd.DataFrame(g_composer, columns=['3DVIA Composer'])
+
+# count of Electrical
+newdfelectrical = T1[(T1['Electrical Total']>0)]
+g_electrical = newdfelectrical.groupby('Country')['Electrical Total'].count()
+g_electrical = pd.DataFrame(g_electrical, columns=['Electrical Total'])
+
+# count of Inspection
+newdfinspection = T1[(T1['SW Inspection']>0)]
+g_inspection = newdfinspection.groupby('Country')['SW Inspection'].count()
+g_inspection = pd.DataFrame(g_inspection, columns=['SW Inspection'])
+
+# concatenate all products into one dataframe
+MP = pd.concat([sw_g, g, g_pdm, g_composer, g_electrical, g_inspection], axis=1)
+
+# rename columns
+MP.columns = ['Count of SW', 'Count of Sim', 'Count of EPDM', 'Count of Composer', 'Count of Electrical', 'Count of Inspection']
+
+# find penetration rate for each product
+MP['Sim Penetration Rate'] = MP['Count of Sim'] / MP['Count of SW']
+MP['Sim Penetration Rate'] = MP['Sim Penetration Rate'].apply(as_percent)
+MP['EPDM Penetration Rate'] = MP['Count of EPDM'] / MP['Count of SW']
+MP['EPDM Penetration Rate'] = MP['EPDM Penetration Rate'].apply(as_percent)
+MP['Composer Penetration Rate'] = MP['Count of Composer'] / MP['Count of SW']
+MP['Composer Penetration Rate'] = MP['Composer Penetration Rate'].apply(as_percent)
+MP['Electrical Penetration Rate'] = MP['Count of Electrical'] / MP['Count of SW']
+MP['Electrical Penetration Rate'] = MP['Electrical Penetration Rate'].apply(as_percent)
+MP['Inspection Penetration Rate'] = MP['Count of Inspection'] / MP['Count of SW']
+MP['Inspection Penetration Rate'] = MP['Inspection Penetration Rate'].apply(as_percent)
+
+writer = ExcelWriter('installbaseOutput_newversion.xlsx')
+T1.to_excel(writer,'Full Table')
+T1_country.to_excel(writer,'Breakdown by Country')
+# T1_VAR.to_excel(writer, 'Breakdown by VAR')
+MP.to_excel(writer, 'MP Penetration')
+T1_0to2seats_country.to_excel(writer, '0-2 seats Country Attach Rate')
+T1_3to4seats_country.to_excel(writer, '3-4 seats Country Attach Rate')
+T1_morethanequal5seats_country.to_excel(writer, '>=5 seats Country Attach Rate')
+MP_0_2.to_excel(writer, '0-2 seats MP Penetration')
+MP_3_4.to_excel(writer, '3-4 seats MP Penetration')
+MP_morethanequal5.to_excel(writer, '>=5 seats MP Penetration')
+writer.save()
+
+
