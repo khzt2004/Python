@@ -1,0 +1,51 @@
+# https://www.codementor.io/python/tutorial/data-science-python-pandas-r-dimensionality-reduction
+# Import pandas module as 'pd'
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+from numbers import Number
+import numpy as np
+import statsmodels.api as sm
+import pylab as pl
+from scipy import stats
+from sklearn.externals.six import StringIO
+from sklearn import preprocessing
+from sklearn import cluster, tree, decomposition
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+# import pydot
+
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file1 = r'apsinstallbase_clustering1.xlsx'
+xls_file1 = pd.read_excel(target_file1)
+T1=pd.DataFrame(xls_file1)
+T1.head()
+
+# Step 1: what are the features I am going to use (that make sense)?
+
+
+num_list = ['Country Mapping', 'SW Industry Mapping', 'SW ', 'SW Office',
+            'SW Pro', 'SW Premium', 'Simulation', 'Simulation Pro', 'Simulation Premium', 
+            'Motion', 'Flow Simulation', 'PDMEnterprise', '3DVIA Composer', 'Electrical 2D'
+            , 'Electrical 3D', 'Electrical Professional', 'SW Plastic Professional', 'SW Plastic Premium',
+            'SW Plastic Advanced', 'SW Inspection']
+            
+T2 = T1[num_list]
+            
+# do PCA 
+
+kmeans = KMeans(n_clusters=3)
+clusters = kmeans.fit(T2)
+T1['cluster'] = pd.Series(clusters.labels_, index=T1.index)
+
+T1.plot(
+        kind='scatter',
+        x='PC2',y='PC1',
+        c=T1.cluster.astype(np.float), 
+        figsize=(16,8))
+
