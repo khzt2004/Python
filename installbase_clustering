@@ -1,4 +1,5 @@
 # https://www.codementor.io/python/tutorial/data-science-python-pandas-r-dimensionality-reduction
+# http://blog.yhat.com/posts/customer-segmentation-using-python.html
 # excel file in google drive
 # Import pandas module as 'pd'
 import pandas as pd
@@ -39,14 +40,43 @@ num_list = ['Country Mapping', 'SW Industry Mapping', 'SW ', 'SW Office',
 T2 = T1[num_list]
             
 # do PCA 
+pca = PCA(n_components=2)
+pca.fit(T2)
+PCA(copy=True, n_components=2, whiten=False)
+existing_2d = pca.transform(T2)
+existing_df_2d = pd.DataFrame(existing_2d)
+existing_df_2d.index = T2.index
+existing_df_2d.columns = ['PC1','PC2']
+existing_df_2d.head()
+print(pca.explained_variance_ratio_)
+#Explained variance
+pca = PCA().fit(T2)
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+plt.xlabel('number of components')
+plt.ylabel('cumulative explained variance')
+plt.show()
 
-kmeans = KMeans(n_clusters=3)
+kmeans = KMeans(n_clusters=5)
 clusters = kmeans.fit(T2)
 T1['cluster'] = pd.Series(clusters.labels_, index=T1.index)
 
-T1.plot(
+existing_df_2d.plot(
         kind='scatter',
         x='PC2',y='PC1',
         c=T1.cluster.astype(np.float), 
         figsize=(16,8))
+        
+df_is4 = T1[(T1['cluster'] == 4)]
+df_is4['SW '].mean()
+df_is4['SW Pro'].mean()
+df_is4['PDMEnterprise'].mean()
+
+df_is1 = T1[(T1['cluster'] == 1)]
+
+df_is0 = T1[(T1['cluster'] == 0)]
+
+df_is2 = T1[(T1['cluster'] == 2)]
+
+df_is3 = T1[(T1['cluster'] == 3)]
+
 
