@@ -1,4 +1,5 @@
 # Import pandas module as 'pd'
+%matplotlib inline
 import pandas as pd
 from dateutil.parser import parse
 from datetime import datetime
@@ -27,6 +28,34 @@ T1=pd.DataFrame(xls_file1)
 T1.head()
 T1['Created month'] = T1['Created'].dt.strftime('%b')
 T1.sort('CSN', ascending=1)
+
+# time series analysis for account creation
+# change data type of date column to datetime
+T1_industry_ = T1[["Created", "CSN"]]
+T1_industry_["Created"].astype(datetime)
+
+# time series analysis for account creation, 2015-2016
+T1_industry_recent = T1_industry_[T1_industry_["Created"].dt.year >= 2015]
+purchase_patterns_recent = T1_industry_recent.set_index('Created')
+purchase_patterns_recent.resample('M',how='count')
+purchase_plot_recent = purchase_patterns_recent.resample('M',how='count').plot(title="Account Creation by Time Period")
+
+# time series analysis for account creation, 2015-2016 y-o-y
+purchase_patterns_recent.index.astype(datetime)
+purchase_patterns_recent['Created month'] = purchase_patterns_recent.index.strftime('%b')
+T1_industry_yoy = pd.pivot_table(purchase_patterns_recent, index=purchase_patterns_recent["Created month"], columns=purchase_patterns_recent.index.year, values="CSN", aggfunc='count')
+T1_industry_yoy.plot(title="Account Creation year-on-year")
+
+# time series analysis for account creation, all years
+purchase_patterns = T1_industry_.set_index('Created')
+purchase_patterns.resample('Q',how='count')
+purchase_plot = purchase_patterns.resample('Q',how='count').plot(title="Account Creation by Time Period")
+
+# time series analysis for account creation, hour
+T1_industry_["Created_hour"] = T1_industry_["Created"].dt.hour
+purchase_patterns_hour = pd.DataFrame(T1_industry_)
+purchase_patterns_hour_table = purchase_patterns_hour.groupby(purchase_patterns_hour['Created_hour']).count()
+purchase_patterns_hour_table.plot.bar(y='CSN', title="Account Creation by Hour", use_index=True)
 
 # attach rate by country
 T1_country=T1[["Country","SolidWorks Total","Simulation Total","PDMEnterprise", "3DVIA Composer", "Electrical Total", "SW Inspection"]].groupby(["Country"]).sum()
