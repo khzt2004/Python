@@ -1,0 +1,38 @@
+%matplotlib inline
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+from numbers import Number
+import numpy as np
+import statsmodels.api as sm
+import pylab as pl
+from scipy import stats
+from sklearn.externals.six import StringIO
+from sklearn import preprocessing
+from sklearn import cluster, tree, decomposition
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import seaborn
+import matplotlib.pyplot as plt
+
+df = pd.DataFrame({
+    'id':['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'], 
+    'group':['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b'], 
+    'value':[.01, .4, .2, .3, .11, .21, .4, .01]
+    })
+
+
+tmp = df.groupby('group').size()
+df.sort_values('value')
+rank = tmp.map(range)
+rank =[item for sublist in rank for item in sublist]
+df['rank'] = rank
+
+# ranking1 = df.groupby('group')['rank'].rank(ascending=False)
+ranking1 = df.groupby('group').apply(pd.DataFrame.sort_values, 'rank')
+ranking_test = df.groupby('group', sort=False)['id'].apply(' '.join)
+
