@@ -1,3 +1,4 @@
+# http://stackoverflow.com/questions/36096311/sorting-the-dates-and-assigning-a-rank-python
 %matplotlib inline
 import pandas as pd
 from dateutil.parser import parse
@@ -30,23 +31,34 @@ xls_file1 = pd.read_excel(target_file1)
 df=pd.DataFrame(xls_file1)
 df.head()
 
+# working sort
+df['rank'] = df.sort_values(['End Account Pseudo ID','Lead Created Date']) \
+                         .groupby(['End Account Pseudo ID'])['Lead Created Date'] \
+                         .rank(method='min').astype(int)
+df_sorted = df.sort_values(['End Account Pseudo ID','Lead Created Date'])
 tmp = df.groupby(['End Account Pseudo ID','Delivery Mechanism', 'Campaign Name', 'Lead Created Date'])['Lic Dollars'].sum()
 tmp_df = pd.DataFrame(tmp)
+tmp_df.index[2][1]
+
+
+# make unique list of pseudo ID
+PID_unique_list = df["End Account Pseudo ID"].unique()
+
+# compare against pseudo ID unique list, find range of dates 
+np.where(df["End Account Pseudo ID"] == PID_unique_list[0])
+select_indices = list(np.where(df["End Account Pseudo ID"] == PID_unique_list[0])[0])
+date_range_list = []
+for index in select_indices:
+    date_range_list.append(df.ix[index][11])
+    output = [0] * len(date_range_list)
+    for i, x in enumerate(sorted(range(len(date_range_list)), key=lambda y: input[y])):
+        output[x] = i
+
+# rank range of dates and add to column in DF
+# move on to next unique pseudo ID in list
+# create new df, add list of unique pseudo ID to first column in new df
+# concatenate lead IDs in order of rank and append to new column in new df
 tmp_df_reset = pd.DataFrame(tmp).reset_index()
-
-mask = tmp_df_reset[(tmp_df_reset['End Account Pseudo ID'] == 'ACFOLD917U')]
-mask['rank'] = mask['Lead Created Date'].rank()
-dictionary = mask.to_dict(orient="rank")
-}
-
-dict_list = []
-i = 0
-while i <= mask['rank'].max():
-    for item in mask["End Account Pseudo ID"]:
-        while i == mask['rank']:
-            dict_list.insert(mask['rank'][i] ,mask['Campaign Name'])
-            i += 1
-            
 
 
 df.sort_values('value')
@@ -57,3 +69,7 @@ df['rank'] = rank
 # ranking1 = df.groupby('group')['rank'].rank(ascending=False)
 ranking1 = df.groupby('group').apply(pd.DataFrame.sort_values, 'rank')
 ranking_test = df.groupby('group', sort=False)['id'].apply(' '.join)
+
+writer = ExcelWriter('multitouch_test.xlsx')
+df_sorted.to_excel(writer,'Full Table')
+writer.save()
