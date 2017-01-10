@@ -7,7 +7,6 @@ from pandasql import sqldf
 from pandas import ExcelWriter
 from numbers import Number
 import numpy as np
-import statsmodels.api as sm
 import pylab as pl
 from scipy import stats
 from sklearn.externals.six import StringIO
@@ -19,14 +18,37 @@ from sklearn.decomposition import PCA
 import seaborn
 import matplotlib.pyplot as plt
 
-df = pd.DataFrame({
-    'id':['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'], 
-    'group':['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b'], 
-    'value':[.01, .4, .2, .3, .11, .21, .4, .01]
-    })
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file1 = r'2016_Multi Touch Campaign Performance - Main Report.xlsx'
+xls_file1 = pd.read_excel(target_file1)
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+df=pd.DataFrame(xls_file1)
+df.head()
+
+tmp = df.groupby(['End Account Pseudo ID','Delivery Mechanism', 'Campaign Name', 'Lead Created Date'])['Lic Dollars'].sum()
+tmp_df = pd.DataFrame(tmp)
+tmp_df_reset = pd.DataFrame(tmp).reset_index()
+
+mask = tmp_df_reset[(tmp_df_reset['End Account Pseudo ID'] == 'ACFOLD917U')]
+mask['rank'] = mask['Lead Created Date'].rank()
+dictionary = mask.to_dict(orient="rank")
+}
+
+dict_list = []
+i = 0
+while i <= mask['rank'].max():
+    for item in mask["End Account Pseudo ID"]:
+        while i == mask['rank']:
+            dict_list.insert(mask['rank'][i] ,mask['Campaign Name'])
+            i += 1
+            
 
 
-tmp = df.groupby('group').size()
 df.sort_values('value')
 rank = tmp.map(range)
 rank =[item for sublist in rank for item in sublist]
@@ -35,4 +57,3 @@ df['rank'] = rank
 # ranking1 = df.groupby('group')['rank'].rank(ascending=False)
 ranking1 = df.groupby('group').apply(pd.DataFrame.sort_values, 'rank')
 ranking_test = df.groupby('group', sort=False)['id'].apply(' '.join)
-
