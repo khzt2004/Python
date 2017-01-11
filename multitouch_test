@@ -31,33 +31,36 @@ xls_file1 = pd.read_excel(target_file1)
 df=pd.DataFrame(xls_file1)
 df.head()
 
-# working sort
+# make unique list of pseudo ID
+PID_unique_list = df["End Account Pseudo ID"].unique()
+PID_unique_list = PID_unique_list.tolist()
+# working sort, find range of dates and rank
 df['rank'] = df.sort_values(['End Account Pseudo ID','Lead Created Date']) \
                          .groupby(['End Account Pseudo ID'])['Lead Created Date'] \
                          .rank(method='min').astype(int)
-df_sorted = df.sort_values(['End Account Pseudo ID','Lead Created Date'])
-tmp = df.groupby(['End Account Pseudo ID','Delivery Mechanism', 'Campaign Name', 'Lead Created Date'])['Lic Dollars'].sum()
+df_sorted = df.sort_values(['End Account Pseudo ID','rank'])
+tmp = df.groupby(['End Account Pseudo ID','Delivery Mechanism', 'Campaign Name', 'Lead Created Date', 'rank'])['Lic Dollars'].sum()
 tmp_df = pd.DataFrame(tmp)
 tmp_df.index[2][1]
 
 
-# make unique list of pseudo ID
-PID_unique_list = df["End Account Pseudo ID"].unique()
 
-# compare against pseudo ID unique list, find range of dates 
-np.where(df["End Account Pseudo ID"] == PID_unique_list[0])
-select_indices = list(np.where(df["End Account Pseudo ID"] == PID_unique_list[0])[0])
-date_range_list = []
-for index in select_indices:
-    date_range_list.append(df.ix[index][11])
-    output = [0] * len(date_range_list)
-    for i, x in enumerate(sorted(range(len(date_range_list)), key=lambda y: input[y])):
-        output[x] = i
-
-# rank range of dates and add to column in DF
 # move on to next unique pseudo ID in list
 # create new df, add list of unique pseudo ID to first column in new df
 # concatenate lead IDs in order of rank and append to new column in new df
+# data from column where end account pseudo
+j = 0
+for j in range(0, len(PID_unique_list)):
+    a = df.loc[df['End Account Pseudo ID'] == PID_unique_list[0]]['Campaign Name'].tolist()
+    b = df.loc[df['End Account Pseudo ID'] == PID_unique_list[0]]['rank'].tolist()
+    b = [x-1 for x in b]
+    dict_ = dict(zip( b, a))
+    c = dict_.values()
+    c = ' > '.join(c)
+
+# add to column in DF
+path_df = pd.DataFrame(PID_unique_list)
+path_df['Campaign Path']
 tmp_df_reset = pd.DataFrame(tmp).reset_index()
 
 
@@ -71,5 +74,6 @@ ranking1 = df.groupby('group').apply(pd.DataFrame.sort_values, 'rank')
 ranking_test = df.groupby('group', sort=False)['id'].apply(' '.join)
 
 writer = ExcelWriter('multitouch_test.xlsx')
-df_sorted.to_excel(writer,'Full Table')
+tmp_df.to_excel(writer,'Pivot Table')
+df.to_excel(writer,'Full Table')
 writer.save()
