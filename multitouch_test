@@ -57,10 +57,13 @@ for j in range(0, len(PID_unique_list)):
     dict_ = dict(zip( b, a))
     c = dict_.values()
     c = ' > '.join(c)
+    campaign_path = []
+    for row in path_df['PID_unique_list']:
+        campaign_path.append(c)
 
 # add to column in DF
 path_df = pd.DataFrame(PID_unique_list)
-path_df['Campaign Path']
+path_df['Campaign Path'] = campaign_path
 tmp_df_reset = pd.DataFrame(tmp).reset_index()
 
 
