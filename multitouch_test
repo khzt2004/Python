@@ -49,23 +49,30 @@ tmp_df.index[2][1]
 # create new df, add list of unique pseudo ID to first column in new df
 # concatenate lead IDs in order of rank and append to new column in new df
 # data from column where end account pseudo
-j = 0
-for j in range(0, len(PID_unique_list)):
-    a = df.loc[df['End Account Pseudo ID'] == PID_unique_list[0]]['Campaign Name'].tolist()
-    b = df.loc[df['End Account Pseudo ID'] == PID_unique_list[0]]['rank'].tolist()
+
+# add to column in DF
+
+path_df = pd.DataFrame(PID_unique_list)
+path_df = path_df.rename(index=str, columns={0: "PID_unique_list"})
+
+# var a & b need to be checked
+for i in range(0, len(PID_unique_list)):
+    a_list = []
+    a = df.loc[df['End Account Pseudo ID'] == PID_unique_list[i]]['Campaign Name'].tolist()
+    b = df.loc[df['End Account Pseudo ID'] == PID_unique_list[i]]['rank'].tolist()
+    print a
+    print b
     b = [x-1 for x in b]
     dict_ = dict(zip( b, a))
     c = dict_.values()
     c = ' > '.join(c)
     campaign_path = []
-    for row in path_df['PID_unique_list']:
-        campaign_path.append(c)
+    campaign_path.append(c)
+    # for row in path_df['PID_unique_list']:
+        
 
-# add to column in DF
-path_df = pd.DataFrame(PID_unique_list)
 path_df['Campaign Path'] = campaign_path
 tmp_df_reset = pd.DataFrame(tmp).reset_index()
-
 
 df.sort_values('value')
 rank = tmp.map(range)
