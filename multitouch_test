@@ -38,18 +38,11 @@ PID_unique_list = PID_unique_list.tolist()
 df['rank'] = df.sort_values(['End Account Pseudo ID','Lead Created Date']) \
                          .groupby(['End Account Pseudo ID'])['Lead Created Date'] \
                          .rank(method='min').astype(int)
-df_sorted = df.sort_values(['End Account Pseudo ID','rank'])
-tmp = df.groupby(['End Account Pseudo ID','Delivery Mechanism', 'Campaign Name', 'Lead Created Date', 'rank'])['Lic Dollars'].sum()
-tmp_df = pd.DataFrame(tmp)
-tmp_df.index[2][1]
-
-
 
 # move on to next unique pseudo ID in list
 # create new df, add list of unique pseudo ID to first column in new df
 # concatenate lead IDs in order of rank and append to new column in new df
 # data from column where end account pseudo
-
 # add to column in DF
 
 path_df = pd.DataFrame(PID_unique_list)
@@ -70,16 +63,6 @@ for i in range(0, len(PID_unique_list)):
     # for row in path_df['PID_unique_list']:
 
 path_df['Campaign Path'] = campaign_path
-tmp_df_reset = pd.DataFrame(tmp).reset_index()
-
-df.sort_values('value')
-rank = tmp.map(range)
-rank =[item for sublist in rank for item in sublist]
-df['rank'] = rank
-
-# ranking1 = df.groupby('group')['rank'].rank(ascending=False)
-ranking1 = df.groupby('group').apply(pd.DataFrame.sort_values, 'rank')
-ranking_test = df.groupby('group', sort=False)['id'].apply(' '.join)
 
 writer = ExcelWriter('multitouch_test.xlsx')
 path_df.to_excel(writer,'Pivot Table')
