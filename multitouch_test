@@ -56,20 +56,18 @@ path_df = pd.DataFrame(PID_unique_list)
 path_df = path_df.rename(index=str, columns={0: "PID_unique_list"})
 
 # var a & b need to be checked
+a_list = []
+b_list = []
+campaign_path = []
 for i in range(0, len(PID_unique_list)):
-    a_list = []
     a = df.loc[df['End Account Pseudo ID'] == PID_unique_list[i]]['Campaign Name'].tolist()
     b = df.loc[df['End Account Pseudo ID'] == PID_unique_list[i]]['rank'].tolist()
-    print a
-    print b
     b = [x-1 for x in b]
-    dict_ = dict(zip( b, a))
+    dict_ = dict(zip(b, a))
     c = dict_.values()
     c = ' > '.join(c)
-    campaign_path = []
     campaign_path.append(c)
     # for row in path_df['PID_unique_list']:
-        
 
 path_df['Campaign Path'] = campaign_path
 tmp_df_reset = pd.DataFrame(tmp).reset_index()
@@ -84,6 +82,6 @@ ranking1 = df.groupby('group').apply(pd.DataFrame.sort_values, 'rank')
 ranking_test = df.groupby('group', sort=False)['id'].apply(' '.join)
 
 writer = ExcelWriter('multitouch_test.xlsx')
-tmp_df.to_excel(writer,'Pivot Table')
+path_df.to_excel(writer,'Pivot Table')
 df.to_excel(writer,'Full Table')
 writer.save()
