@@ -1,0 +1,9 @@
+
+mac: 
+sed 1d sh*.csv > merged.csv
+
+# delete the first row of input file and then merge csvs
+
+windows:
+
+C:\> copy *.csv merged.csv
