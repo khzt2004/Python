@@ -1,0 +1,34 @@
+# Import pandas module as 'pd'
+# https://www.ibm.com/developerworks/community/blogs/jfp/entry/Tidy_Data_In_Python?lang=en
+%matplotlib inline
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+from numbers import Number
+import matplotlib.pyplot as plt
+
+
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file1 = r'book8.xlsx'
+xls_file1 = pd.read_excel(target_file1)
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+df1=pd.DataFrame(xls_file1)
+df1.head()
+
+tidy = pd.melt(df1, 
+               id_vars=['Province'], 
+               var_name='Manufacturing Sector', 
+               value_name='No. of establishments')
+               
+writer = ExcelWriter('tidyoutput_province.xlsx')
+tidy.to_excel(writer,'Full Table')
+writer.save()
+
