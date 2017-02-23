@@ -1,0 +1,73 @@
+# http://stackoverflow.com/questions/36096311/sorting-the-dates-and-assigning-a-rank-python
+%matplotlib inline
+import pandas as pd
+from dateutil.parser import parse
+from datetime import datetime
+import xlrd
+from pandasql import sqldf
+from pandas import ExcelWriter
+from numbers import Number
+import numpy as np
+import pylab as pl
+from scipy import stats
+from sklearn.externals.six import StringIO
+from sklearn import preprocessing
+from sklearn import cluster, tree, decomposition
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import seaborn
+import matplotlib.pyplot as plt
+from pandasql import sqldf
+
+# Create a dataframe
+# specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
+target_file1 = r'2016_Multi Touch Campaign Performance - Main Report.xlsx'
+xls_file1 = pd.read_excel(target_file1)
+# xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Account Created'] =  pd.to_datetime(xls_file['Account Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Contact Created'] =  pd.to_datetime(xls_file['Contact Created'], format='%m-%d-%Y %I:%M:%S')
+# xls_file['Last Updated'] =  pd.to_datetime(xls_file['Last Updated'], format='%m-%d-%Y %I:%M:%S')
+df=pd.DataFrame(xls_file1)
+df.head()
+
+# replace spaces in column names with underscore
+df.columns = [x.strip().replace(' ', '_') for x in df.columns]
+
+# find all first touches of campaigns for each end account pseudo ID
+pysqldf = lambda q: sqldf(q, globals())
+
+q  = """
+SELECT DISTINCT
+df.End_Account_Pseudo_ID
+, df.Lead_Created_Date
+, df.Lead_ID
+, df.Campaign_Name
+, df.Delivery_Mechanism
+FROM
+df
+WHERE df.Lead_Created_Date IN (
+  SELECT MIN(df.Lead_Created_Date)
+  FROM df
+  GROUP BY df.End_Account_Pseudo_ID
+)
+ORDER BY
+df.End_Account_Pseudo_ID ASC;
+"""
+df_first_touch = pysqldf(q)
+
+q  = """
+SELECT df_first_touch.Delivery_Mechanism, COUNT(df_first_touch.Lead_ID)
+FROM
+ df_first_touch
+GROUP BY
+ df_first_touch.Delivery_Mechanism;
+"""
+df_DM_firstTouch = pysqldf(q)
+
+writer = ExcelWriter('multitouch_analysis.xlsx')
+df_first_touch.to_excel(writer,'FirstTouch List')
+df_DM_firstTouch.to_excel(writer,'FirstTouch DM')
+writer.save()
+
