@@ -1,0 +1,17 @@
+# http://chrisalbon.com/python/pandas_regex_to_create_columns.html
+from os import listdir
+from os.path import isfile, join
+import re
+import pandas as pd
+import numpy as np
+from io import open
+filename = r'chat.txt'
+x = open(filename,'r', encoding='utf-8')
+y = x.read()
+content = y.splitlines()
+df = pd.DataFrame(content, columns = ['raw'])
+df['date'] = df['raw'].str.extract('(\d+/\d+/\d+)', expand=True)
+time_regex = r'(\d+:\d+:\d+)\s[(a-zA-Z)][(a-zA-Z)]'
+df['time'] = df['raw'].str.extract(time_regex, expand=True)
+df['name']
+df['message']
