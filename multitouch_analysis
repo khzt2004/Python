@@ -45,6 +45,7 @@ df.End_Account_Pseudo_ID
 , df.Lead_ID
 , df.Campaign_Name
 , df.Delivery_Mechanism
+, df.Lic_Dollars
 FROM
 df
 WHERE df.Lead_Created_Date IN (
@@ -57,8 +58,9 @@ df.End_Account_Pseudo_ID ASC;
 """
 df_first_touch = pysqldf(q)
 
+# count all first touches by delivery mechanism
 q  = """
-SELECT df_first_touch.Delivery_Mechanism, COUNT(df_first_touch.Lead_ID)
+SELECT df_first_touch.Delivery_Mechanism, COUNT(DISTINCT df_first_touch.Lead_ID)
 FROM
  df_first_touch
 GROUP BY
@@ -66,8 +68,43 @@ GROUP BY
 """
 df_DM_firstTouch = pysqldf(q)
 
+# find all last touches of campaigns for each end account pseudo ID
+pysqldf = lambda q: sqldf(q, globals())
+
+q  = """
+SELECT DISTINCT
+df.End_Account_Pseudo_ID
+, df.Lead_Created_Date
+, df.Lead_ID
+, df.Campaign_Name
+, df.Delivery_Mechanism
+, df.Lic_Dollars
+FROM
+df
+WHERE df.Lead_Created_Date IN (
+  SELECT MAX(df.Lead_Created_Date)
+  FROM df
+  GROUP BY df.End_Account_Pseudo_ID
+)
+ORDER BY
+df.End_Account_Pseudo_ID ASC;
+"""
+df_last_touch = pysqldf(q)
+
+# count all last touches by delivery mechanism
+q  = """
+SELECT df_last_touch.Delivery_Mechanism, COUNT(DISTINCT df_last_touch.Lead_ID)
+FROM
+ df_last_touch
+GROUP BY
+ df_last_touch.Delivery_Mechanism;
+"""
+df_DM_lastTouch = pysqldf(q)
+
 writer = ExcelWriter('multitouch_analysis.xlsx')
+df.to_excel(writer, 'Full Table')
 df_first_touch.to_excel(writer,'FirstTouch List')
 df_DM_firstTouch.to_excel(writer,'FirstTouch DM')
+df_last_touch.to_excel(writer, 'LastTouch List')
+df_DM_lastTouch.to_excel(writer, 'LastTouch DM')
 writer.save()
-
