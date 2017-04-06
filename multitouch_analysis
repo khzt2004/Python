@@ -2,7 +2,7 @@
 %matplotlib inline
 import pandas as pd
 from dateutil.parser import parse
-from datetime import datetime
+from datetime import datetime as dt
 import xlrd
 from pandasql import sqldf
 from pandas import ExcelWriter
@@ -22,7 +22,7 @@ from pandasql import sqldf
 
 # Create a dataframe
 # specify file path for windows users: target_file = r'C:\Users\k6o\aseanoutput.xlsx'
-target_file1 = r'2016_Multi Touch Campaign Performance - Main Report.xlsx'
+target_file1 = r'2017 Q1 Multi Touch Campaign Performance - Main Report.xlsx'
 xls_file1 = pd.read_excel(target_file1)
 # xls_file['Date Sent'] =  pd.to_datetime(xls_file['Date Sent'], format='%m-%d-%Y %I:%M:%S')
 # xls_file['Created Date'] =  pd.to_datetime(xls_file['Created Date'], format='%m-%d-%Y %I:%M:%S')
@@ -68,6 +68,23 @@ GROUP BY
 """
 df_DM_firstTouch = pysqldf(q)
 
+df_first_touch_dates = df_first_touch[['End_Account_Pseudo_ID','Lead_Created_Date']]
+df_first_touch_dates = df_first_touch_dates.rename(columns={'Lead_Created_Date': 'First_Touch_Date'})
+
+# add first touch date to dataframe
+q  = """
+SELECT *
+FROM
+ df
+LEFT JOIN df_first_touch_dates
+ON df.End_Account_Pseudo_ID = df_first_touch_dates.End_Account_Pseudo_ID;
+"""
+df_new = pysqldf(q)
+df_new['Lead_Created_Date'] = pd.to_datetime(df_new['Lead_Created_Date'])
+df_new['First_Touch_Date'] = pd.to_datetime(df_new['First_Touch_Date'])
+df_new['Days_Since_FirstTouch'] = df_new['Lead_Created_Date'] - df_new['First_Touch_Date']
+df_new['Days_Since_FirstTouch'] = df_new['Days_Since_FirstTouch'].map(lambda x: np.nan if pd.isnull(x) else x.days)
+
 # find all last touches of campaigns for each end account pseudo ID
 pysqldf = lambda q: sqldf(q, globals())
 
@@ -103,8 +120,10 @@ df_DM_lastTouch = pysqldf(q)
 
 writer = ExcelWriter('multitouch_analysis.xlsx')
 df.to_excel(writer, 'Full Table')
+df_new.to_excel(writer, 'Table_Days_Since')
 df_first_touch.to_excel(writer,'FirstTouch List')
 df_DM_firstTouch.to_excel(writer,'FirstTouch DM')
 df_last_touch.to_excel(writer, 'LastTouch List')
 df_DM_lastTouch.to_excel(writer, 'LastTouch DM')
 writer.save()
+
