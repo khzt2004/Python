@@ -69,7 +69,7 @@ GROUP BY
 df_DM_firstTouch = pysqldf(q)
 
 df_first_touch_dates = df_first_touch[['End_Account_Pseudo_ID','Lead_Created_Date']]
-df_first_touch_dates = df_first_touch_dates.rename(columns={'Lead_Created_Date': 'First_Touch_Date'})
+df_first_touch_dates = df_first_touch_dates.rename(columns={'End_Account_Pseudo_ID': 'End_Account_Pseudo_ID2', 'Lead_Created_Date': 'First_Touch_Date'})
 
 # add first touch date to dataframe
 q  = """
@@ -77,7 +77,7 @@ SELECT *
 FROM
  df
 LEFT JOIN df_first_touch_dates
-ON df.End_Account_Pseudo_ID = df_first_touch_dates.End_Account_Pseudo_ID;
+ON df.End_Account_Pseudo_ID = df_first_touch_dates.End_Account_Pseudo_ID2;
 """
 df_new = pysqldf(q)
 df_new['Lead_Created_Date'] = pd.to_datetime(df_new['Lead_Created_Date'])
@@ -117,6 +117,13 @@ GROUP BY
  df_last_touch.Delivery_Mechanism;
 """
 df_DM_lastTouch = pysqldf(q)
+
+# plot graph of days since first touch
+
+df_daysSinceGraph = df_new[['End_Account_Pseudo_ID', 'Lead_Account_Country', 'Days_Since_FirstTouch']]
+df_daysSinceGraph_country = df_daysSinceGraph[(df_daysSinceGraph['Lead_Account_Country'] == 'Singapore')]
+df_daysSinceGraph_country = pd.
+df_daysSinceGraph_country.plot()
 
 writer = ExcelWriter('multitouch_analysis.xlsx')
 df.to_excel(writer, 'Full Table')
