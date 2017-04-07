@@ -87,6 +87,7 @@ df_new['Days_Since_FirstTouch'] = df_new['Days_Since_FirstTouch'].map(lambda x: 
 
 df_new.sort_values(by=['End_Account_Pseudo_ID', 'Days_Since_FirstTouch'], inplace=True)
 df_new['Days_Since_PrevTouch'] = df_new.groupby('End_Account_Pseudo_ID')['Days_Since_FirstTouch'].diff().fillna('-')
+df_new['Campaign Path'] = df_new.groupby('End_Account_Pseudo_ID')['Lead_Created_Date'].rank(method='min', na_option='keep')
 
 # find all last touches of campaigns for each end account pseudo ID
 pysqldf = lambda q: sqldf(q, globals())
