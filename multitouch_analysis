@@ -85,6 +85,9 @@ df_new['First_Touch_Date'] = pd.to_datetime(df_new['First_Touch_Date'])
 df_new['Days_Since_FirstTouch'] = df_new['Lead_Created_Date'] - df_new['First_Touch_Date']
 df_new['Days_Since_FirstTouch'] = df_new['Days_Since_FirstTouch'].map(lambda x: np.nan if pd.isnull(x) else x.days)
 
+df_new.sort_values(by=['End_Account_Pseudo_ID', 'Days_Since_FirstTouch'], inplace=True)
+df_new['Days_Since_PrevTouch'] = df_new.groupby('End_Account_Pseudo_ID')['Days_Since_FirstTouch'].diff().fillna('-')
+
 # find all last touches of campaigns for each end account pseudo ID
 pysqldf = lambda q: sqldf(q, globals())
 
@@ -120,10 +123,10 @@ df_DM_lastTouch = pysqldf(q)
 
 # plot graph of days since first touch
 
-df_daysSinceGraph = df_new[['End_Account_Pseudo_ID', 'Lead_Account_Country', 'Days_Since_FirstTouch']]
-df_daysSinceGraph_country = df_daysSinceGraph[(df_daysSinceGraph['Lead_Account_Country'] == 'Singapore')]
-df_daysSinceGraph_country = pd.
-df_daysSinceGraph_country.plot()
+# df_daysSinceGraph = df_new[['End_Account_Pseudo_ID', 'Lead_Account_Country', 'Days_Since_FirstTouch']]
+# df_daysSinceGraph_country = df_daysSinceGraph[(df_daysSinceGraph['Lead_Account_Country'] == 'Singapore')]
+# df_daysSinceGraph_country = pd.
+# df_daysSinceGraph_country.plot()
 
 writer = ExcelWriter('multitouch_analysis.xlsx')
 df.to_excel(writer, 'Full Table')
