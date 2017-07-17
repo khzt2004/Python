@@ -1,0 +1,66 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
+
+url = 'https://github.com/khzt2004/Rodeo/raw/master/Ecommerce%20Customers.csv'
+customers = pd.read_csv(url)
+customers.info()
+
+# compare the time spent on the website with the yearly amount spent
+sns.jointplot('Time on Website', 'Yearly Amount Spent', data=customers)
+
+# pairplots - create jointplots for all pair combinations of features in the dataset.
+
+sns.pairplot(customers)
+
+# confirm if length of membership is the strongest correlated feature with yearly amount spent
+sns.lmplot('Yearly Amount Spent', 'Length of Membership', data=customers)
+
+# regression - amount spent yearly as the dependent variable y. 
+# The other numeric columns make up independent variables X.
+X = customers[['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership']] 
+y = customers[['Yearly Amount Spent']]
+
+# split data into training set (70%) and a test set (30%)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=101)
+lm = LinearRegression()
+lm.fit(X_train, y_train)
+lm.coef_
+
+# test the regression model
+predictions = lm.predict(X_test)
+
+# build a scatterplot of the actual yearly amount spent (from y_test) 
+# against the predicted yearly amount spent (from predictions)
+plt.scatter(y_test, predictions)
+plt.xlabel('Y Test')
+plt.ylabel('Predicted Y')
+
+# evaluate model 
+
+# Mean Absolute Error
+mae = metrics.mean_absolute_error(y_test, predictions)
+mae
+# Mean Squared Error
+mse = metrics.mean_squared_error(y_test, predictions)
+mse
+# Root Mean Squared Error
+rmse = np.sqrt(metrics.mean_squared_error(y_test, predictions))
+rmse
+
+sns.distplot(y_test-predictions, bins=50, kde=True)
+plt.xlabel('Yearly Amount Spent')
+plt.ylabel('Residual')
+
+# recreate the coefficients as a dataframe
+# see which feature (time on app or time on website) has more influence on yearly amount spent
+coeffs = pd.DataFrame(data=lm.coef_.transpose(), index=X.columns, columns=['Coefficient'])
+coeffs
+
+# one minute on the app corresponds to $38.59 in revenue <- more time on app increases more revenue
+# whereas one minute on website corresponds to just $0.19 in revenue
