@@ -1,0 +1,28 @@
+import pandas as pd
+
+# read in the csv file
+df = pd.read_csv('pivot_raw_data.csv')
+
+# unpivot using melt
+df_melt = pd.melt(df, 
+id_vars=['Date_of_Week',
+'Year', 'Month', 'Channel', 'Brand', 'Country', 'Category'],
+value_vars = ['NMV', 'Item', 'ASP', 'PV'],
+var_name = 'Metric', value_name = 'Values')
+
+# pivot out and aggregate values column
+df_pivot = pd.pivot_table(df_melt, values='Values', index=['Date_of_Week',
+'Year', 'Month', 'Channel', 'Brand', 'Country', 'Category'],
+columns=['Metric'], aggfunc=np.sum)
+
+# reset the index after pivoting
+df_pivot = df_pivot.reset_index()
+
+# pivot out using the category column and aggregate the values column
+df_category_pivot = pd.pivot_table(df_melt, values='Values', index=['Date_of_Week',
+'Year', 'Month', 'Channel', 'Brand', 'Country', 'Metric'],
+columns=['Category'], aggfunc=np.sum)
+
+# reset the index after pivoting
+df_category_pivot = df_category_pivot.reset_index()
+
