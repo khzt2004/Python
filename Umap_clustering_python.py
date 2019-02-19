@@ -28,19 +28,21 @@ embedding = umap.UMAP().fit_transform(hdd_new)
 standard_embedding = umap.UMAP(random_state=42).fit_transform(hdd_new)
 
 # Scree plots
-K = range(1,21)
-KM = [KMeans(n_clusters=k).fit(standard_embedding) for k in K]
-centroids = [k.cluster_centers_ for k in KM]
+def scree_plot(x):
+   K = range(1,21)
+   KM = [KMeans(n_clusters=k).fit(x) for k in K]
+   centroids = [k.cluster_centers_ for k in KM]
+   D_k = [cdist(x, cent, 'euclidean') for cent in centroids]
+   cIdx = [np.argmin(D,axis=1) for D in D_k]
+   dist = [np.min(D,axis=1) for D in D_k]
+   avgWithinSS = [sum(d)/x.shape[0] for d in dist]
+   
+   wcss = [sum(d**2) for d in dist]
+   tss = sum(pdist(x)**2)/x.shape[0]
+   bss = tss-wcss
+   return K, avgWithinSS, tss, bss;
 
-D_k = [cdist(standard_embedding, cent, 'euclidean') for cent in centroids]
-cIdx = [np.argmin(D,axis=1) for D in D_k]
-dist = [np.min(D,axis=1) for D in D_k]
-avgWithinSS = [sum(d)/standard_embedding.shape[0] for d in dist]
-
-# Total with-in sum of square
-wcss = [sum(d**2) for d in dist]
-tss = sum(pdist(standard_embedding)**2)/standard_embedding.shape[0]
-bss = tss-wcss
+K, avgWithinSS, tss, bss = scree_plot(standard_embedding)
 
 # elbow curve
 fig = plt.figure()
@@ -56,7 +58,7 @@ plt.clf()
 plt.cla()
 plt.close()
 
-
+# percentage of variance explained
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(K, bss/tss*100, 'b*-')
