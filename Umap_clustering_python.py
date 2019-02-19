@@ -97,6 +97,13 @@ plt.close()
 
 hdd['cluster'] = y_kmeans
 
+# cluster aggregation and exploration
+hdd_cluster_aggregate = hdd.groupby('cluster')['Desc_00002', 
+               'Desc_00003',
+               'Desc_00013',
+               'Prop_001'].mean()
+
+
 # use clusterable embeddings
 
 clusterable_embedding = umap.UMAP(
