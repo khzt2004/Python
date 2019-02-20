@@ -14,6 +14,7 @@ from scipy.spatial.distance import cdist,pdist
 from sklearn.metrics import adjusted_rand_score, adjusted_mutual_info_score
 from scipy.cluster.vq import kmeans
 from matplotlib import cm
+from sklearn import metrics
 
 hdd = pd.read_csv("C:\\Users\\User\\Documents\\High Dimensionl Data.csv")
 hdd_new = hdd.drop(['Desc_00001'], axis=1)
@@ -72,11 +73,19 @@ plt.clf()
 plt.cla()
 plt.close()
 
+# Silhouette score
+def silhouette_score(x):
+    for n_cluster in range(2, 21):
+        kmeans = KMeans(n_clusters=n_cluster).fit(x)
+        label = kmeans.labels_
+        sil_coeff = metrics.silhouette_score(x, label, metric='euclidean')
+        print("For n_clusters={}, The Silhouette Coefficient is {}".format(n_cluster, sil_coeff))
+
+silhouette_score(standard_embedding)
 
 # perform K means clustering 
-kmeans = KMeans(n_clusters=3)
-kmeans.fit(standard_embedding)
-y_kmeans = kmeans.predict(standard_embedding)
+kmeans_model = KMeans(n_clusters=3).fit(standard_embedding)
+y_kmeans = kmeans_model.predict(standard_embedding)
 
 plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], 
 c=y_kmeans, s=30, cmap='Spectral');
@@ -87,13 +96,24 @@ plt.cla()
 plt.close()
 
 
-centers = kmeans.cluster_centers_
+centers = kmeans_model.cluster_centers_
 plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5);
 plt.show()
 
 plt.clf()
 plt.cla()
 plt.close()
+
+# calculate silhouette score/coefficient to evaluate clustering
+# The score is bounded between -1 for incorrect clustering and 
+# +1 for highly dense clustering. Scores around zero indicate overlapping clusters.
+labels = kmeans_model.labels_
+metrics.silhouette_score(standard_embedding, labels, metric='euclidean')
+
+# Calculate Calinski-Harabaz Index
+# The score is higher when clusters are dense and well separated, 
+# which relates to a standard concept of a cluster.
+metrics.calinski_harabaz_score(standard_embedding, labels) 
 
 # Map clusters back to standard embedding
 
