@@ -1,12 +1,14 @@
 # http://www.awesomestats.in/python-cluster-validation/
 
 import umap
+import time
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.datasets import fetch_mldata
 import plotly.plotly as py
 from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans
 import sklearn.cluster as cluster
 from sklearn.metrics import silhouette_score
 import numpy as np
@@ -31,7 +33,7 @@ standard_embedding = umap.UMAP(random_state=42).fit_transform(hdd_new)
 # Scree plots
 def scree_plot(x):
    K = range(1,21)
-   KM = [KMeans(n_clusters=k).fit(x) for k in K]
+   KM = [KMeans(n_clusters=k, n_jobs=-1).fit(x) for k in K]
    centroids = [k.cluster_centers_ for k in KM]
    D_k = [cdist(x, cent, 'euclidean') for cent in centroids]
    cIdx = [np.argmin(D,axis=1) for D in D_k]
@@ -43,7 +45,46 @@ def scree_plot(x):
    bss = tss-wcss
    return K, avgWithinSS, tss, bss;
 
+
+def scree_benchmark(x):
+    K, avgWithinSS, tss, bss = scree_plot(x)
+
+
 K, avgWithinSS, tss, bss = scree_plot(standard_embedding)
+
+# time a function as benchmark
+#def scree_plot_minibatch(x):
+#   K = range(1,21)
+#   KM = [MiniBatchKMeans(n_clusters=k).fit(x) for k in K]
+#   centroids = [k.cluster_centers_ for k in KM]
+#   D_k = [cdist(x, cent, 'euclidean') for cent in centroids]
+#   cIdx = [np.argmin(D,axis=1) for D in D_k]
+#   dist = [np.min(D,axis=1) for D in D_k]
+#   avgWithinSS = [sum(d)/x.shape[0] for d in dist]
+#   
+#   wcss = [sum(d**2) for d in dist]
+#   tss = sum(pdist(x)**2)/x.shape[0]
+#   bss = tss-wcss
+#   return K, avgWithinSS, tss, bss;
+
+
+#def scree_benchmark_minibatch(x):
+#    K, avgWithinSS, tss, bss = scree_plot_minibatch(x)
+
+
+#n = 50
+#t0 = time.time()
+#for i in range(n): scree_benchmark(standard_embedding)
+#t1 = time.time()
+
+#total_n = t1-t0
+
+#t2 = time.time()
+#for i in range(n): scree_benchmark_minibatch(standard_embedding)
+#t3 = time.time()
+
+#total_n_minibatch = t3-t2
+
 
 # elbow curve
 fig = plt.figure()
@@ -76,7 +117,7 @@ plt.close()
 # Silhouette score
 def silhouette_score(x):
     for n_cluster in range(2, 21):
-        kmeans = KMeans(n_clusters=n_cluster).fit(x)
+        kmeans = KMeans(n_clusters=n_cluster, n_jobs=-1).fit(x)
         label = kmeans.labels_
         sil_coeff = metrics.silhouette_score(x, label, metric='euclidean')
         print("For n_clusters={}, The Silhouette Coefficient is {}".format(n_cluster, sil_coeff))
@@ -84,7 +125,7 @@ def silhouette_score(x):
 silhouette_score(standard_embedding)
 
 # perform K means clustering 
-kmeans_model = KMeans(n_clusters=3).fit(standard_embedding)
+kmeans_model = KMeans(n_clusters=3, n_jobs=-1).fit(standard_embedding)
 y_kmeans = kmeans_model.predict(standard_embedding)
 
 plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], 
