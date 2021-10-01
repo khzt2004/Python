@@ -57,11 +57,13 @@ time_series_df[['10 yr treasury index date funded',
 
 
 # create the dataframe for third plot
+
+
 lux_loan['funding_year'] = pd.DatetimeIndex(lux_loan['funded_date']).year
 
 prop_df = lux_loan[['funding_year', 'BUILDING CLASS CATEGORY', 'property value', 'funded_amount', 'purpose']]
 
-
+available_years = prop_df['funding_year'].sort_values(ascending = True).unique()
 
 ############################################################
 
@@ -93,19 +95,19 @@ time_fig.update_yaxes(matches=None, tickformat='.0%')
 
 # render the third plot 
 
-dot_fig = px.strip(prop_df, 
-             x="funding_year",
-             y="property value",
-             color="BUILDING CLASS CATEGORY",
-             facet_col = "funding_year",
-             facet_col_wrap = 3,
-             hover_data={'funded_amount', 'purpose'},
-            #  points = "all",
-             width=1100, 
-             height=1000)
+# dot_fig = px.strip(prop_df, 
+#              x="funding_year",
+#              y="property value",
+#              color="BUILDING CLASS CATEGORY",
+#              facet_col = "funding_year",
+#              facet_col_wrap = 3,
+#              hover_data={'funded_amount', 'purpose'},
+#             #  points = "all",
+#              width=1100, 
+#              height=1000)
 
-dot_fig.update_yaxes(matches=None)
-dot_fig.update_xaxes(matches=None)
+# dot_fig.update_yaxes(matches=None)
+# dot_fig.update_xaxes(matches=None)
 
 
 # components
@@ -159,12 +161,39 @@ app.layout = html.Div(children=[
             This shows a clear outlier in terms of funded amount in 2018, which was for a plane purchase.
         '''),
 
+        dcc.Dropdown(
+                id='year-dropdown',
+                options=[{'label': i, 'value': i} for i in available_years],
+                value = available_years[0]
+        ),
+
         dcc.Graph(
             id='graph3',
-            figure=dot_fig
         ),  
     ]),
 ])
+
+
+# Callback function that automatically updates year for 3rd plot
+@app.callback(
+    Output('graph3', 'figure'),
+    [Input('year-dropdown', 'value')]
+)
+def update_figure(selected_year):
+    dot_fig = px.strip(prop_df, 
+             x=prop_df['funding_year'][prop_df['funding_year'] == selected_year],
+             y=prop_df['property value'][prop_df['funding_year'] == selected_year],
+             color=prop_df['BUILDING CLASS CATEGORY'][prop_df['funding_year'] == selected_year],
+             # hover_data={'funded_amount', 'purpose'},
+             width=800, 
+             height=800)
+    # dot_fig.update_traces(
+    #     mode="markers+lines", 
+    #     hovertemplate={'funded_amount', 'purpose'})
+    dot_fig.update_yaxes(matches=None)
+    dot_fig.update_xaxes(matches=None)   
+    return dot_fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
