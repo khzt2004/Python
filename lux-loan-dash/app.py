@@ -158,13 +158,14 @@ app.layout = html.Div(children=[
         html.H1(children='Property value broken down by Funding Year and Building class category'),
 
         html.Div(children='''
-            This shows a clear outlier in terms of funded amount in 2018, which was for a plane purchase.
+            This shows a clear outlier in terms of funded amount in 2018 at 156 million, which was for a plane purchase.
         '''),
 
         dcc.Dropdown(
                 id='year-dropdown',
                 options=[{'label': i, 'value': i} for i in available_years],
-                value = available_years[0]
+                value = available_years[0],
+            style={"width": "60%"},
         ),
 
         dcc.Graph(
@@ -184,12 +185,13 @@ def update_figure(selected_year):
              x=prop_df['funding_year'][prop_df['funding_year'] == selected_year],
              y=prop_df['property value'][prop_df['funding_year'] == selected_year],
              color=prop_df['BUILDING CLASS CATEGORY'][prop_df['funding_year'] == selected_year],
-             # hover_data={'funded_amount', 'purpose'},
+             # hover_data={
+             # 'funded_amount',
+              # 'purpose'
+              # },
              width=800, 
              height=800)
-    # dot_fig.update_traces(
-    #     mode="markers+lines", 
-    #     hovertemplate={'funded_amount', 'purpose'})
+
     dot_fig.update_yaxes(matches=None)
     dot_fig.update_xaxes(matches=None)   
     return dot_fig
