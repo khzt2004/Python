@@ -114,7 +114,7 @@ dot_fig.update_xaxes(matches=None)
 app.layout = html.Div(children=[
     # All elements from the top of the page
     html.Div([
-        html.H1(children='This is my first interesting plot.'),
+        html.H1(children='Loan Amount and Duration broken down by Purpose.'),
 
         html.Div(children='''
             This shows that luxury items like boats and planes may have high funding requirement but have quite a low time to payback.'''),
@@ -132,7 +132,7 @@ app.layout = html.Div(children=[
 
 # components for second plot
     html.Div([
-        html.H1(children='This is my second interesting plot.'),
+        html.H1(children='Interest rates and Treasury indices broken down by Purpose over Time'),
 
         html.Div(children='''
             This shows a clear fluctuation of interest rates with 10 year treasury index rates. The interest rates do not differ much by purpose.
@@ -153,7 +153,7 @@ app.layout = html.Div(children=[
 
 # components for third plot
     html.Div([
-        html.H1(children='This is my third interesting plot.'),
+        html.H1(children='Property value broken down by Funding Year and Building class category'),
 
         html.Div(children='''
             This shows a clear outlier in terms of funded amount in 2018, which was for a plane purchase.
