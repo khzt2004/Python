@@ -5,11 +5,12 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 from flask import Flask
+import dash_bootstrap_components as dbc
 
 
 server = Flask(__name__)
 
-app = dash.Dash(server=server, , external_stylesheets=[dbc.themes.FLATLY])
+app = dash.Dash(server=server, external_stylesheets=[dbc.themes.FLATLY])
 app.title = 'Dashboard'
 
 
