@@ -1,11 +1,12 @@
 version: '3.7'
 services:
-  dash-app:
+  app:
+    container_name: 'app'
     restart: always
     build: .
-    container_name: 'dash-app'
     ports:
-      - "5050:5050"
+      - "8000:8000"
+    command: gunicorn --workers=5 --threads=1 -b 0.0.0.0:8000 app:server
     working_dir: '/root'
     tty: true
     volumes:
