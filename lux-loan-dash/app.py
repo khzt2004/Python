@@ -120,60 +120,89 @@ time_fig.update_yaxes(matches=None, tickformat='.0%')
 app.layout = html.Div(children=[
     # All elements from the top of the page
     html.Div([
-        html.H1(children='Loan Amount and Duration broken down by Purpose.'),
+        html.H1(children='Loan Amount and Duration broken down by Purpose',
+                style={'fontSize': 40,
+                       'textAlign': 'center'},
+            ),
+
+        html.Div(html.Br()),
 
         html.Div(children='''
-            This shows that luxury items like boats and planes may have high funding requirement but have quite a low time to payback.'''),
+            This shows that luxury items like boats and planes may have high funding requirement but have quite a low time to payback.''',
+            style={'margin-left': '3vw'}
+            ),
         
         html.Div(html.Br()),
         
         html.Div(children= '''If such loans are shown to have lower risk and faster time to payback, it might be worth spending more effort and resources to market these to eligible customers.
-        '''),
+        ''',
+            style={'margin-left': '3vw'}),
 
         dcc.Graph(
             id='graph1',
-            figure=fig
+            figure=fig,
+            style={'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '23vw'}
         ),  
     ]),
 
 # components for second plot
     html.Div([
-        html.H1(children='Interest rates and Treasury indices broken down by Purpose over Time'),
+        html.H1(children='Interest rates and Treasury indices broken down by Purpose over Time',
+            style={'fontSize': 40,
+                   'textAlign': 'center'},
+        ),
+
+        html.Div(html.Br()),
 
         html.Div(children='''
             This shows a clear fluctuation of interest rates with 10 year treasury index rates. The interest rates do not differ much by purpose.
-        '''),
+        ''',
+            style={'margin-left': '3vw'}
+        ),
 
         html.Div(html.Br()),
 
          html.Div(children='''
         This might be 
         an opportunity for increasing revenue by means of personalised interest rates according to a user's credit score and risk profile.
-        '''),       
+        ''',
+            style={'margin-left': '3vw'}
+        ),     
 
         dcc.Graph(
             id='graph2',
-            figure=time_fig
+            figure=time_fig,
+            style={'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '23vw'}
         ),  
     ]),
 
 # components for third plot
     html.Div([
-        html.H1(children='Property value broken down by Funding Year and Building class category'),
+        html.H1(children='Property value broken down by Funding Year and Building class category',
+                style={'fontSize': 40,
+                       'textAlign': 'center'},
+        ),
+
+        html.Div(html.Br()),
 
         html.Div(children='''
             This shows a clear outlier in terms of funded amount in 2018 at 156 million, which was for a plane purchase.
-        '''),
+        ''',
+            style={'margin-left': '3vw'}
+        ),
+
+        html.Div(html.Br()),
 
         dcc.Dropdown(
                 id='year-dropdown',
                 options=[{'label': i, 'value': i} for i in available_years],
                 value = available_years[0],
-            style={"width": "60%"},
+            style={"width": "60%", 'margin-left': '15vw'},
         ),
 
         dcc.Graph(
             id='graph3',
+            style={'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '23vw'}
         ),  
     ]),
 ])
@@ -189,10 +218,10 @@ def update_figure(selected_year):
              x=prop_df['funding_year'][prop_df['funding_year'] == selected_year],
              y=prop_df['property value'][prop_df['funding_year'] == selected_year],
              color=prop_df['BUILDING CLASS CATEGORY'][prop_df['funding_year'] == selected_year],
-             # hover_data={
-             # 'funded_amount',
-              # 'purpose'
-              # },
+             labels={
+                "x": "Funding Year",
+                "y": "Property Value",
+             },
              width=800, 
              height=800)
 
