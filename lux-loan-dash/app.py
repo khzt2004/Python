@@ -4,10 +4,13 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
+from flask import Flask
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = Flask(__name__)
+
+app = dash.Dash(server=server, , external_stylesheets=[dbc.themes.FLATLY])
+app.title = 'Dashboard'
 
 
 # import the csv into a dataframe

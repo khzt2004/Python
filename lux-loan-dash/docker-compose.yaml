@@ -1,17 +1,13 @@
 version: '3.7'
 services:
-  dashboard:
-    build: 
-      context: ./
-    container_name: 
-      {COMPOSE_PROJECT_NAME}_dashboard  
-      hostname:{COMPOSE_PROJECT_NAME}_dashboard
-     restart: always
-     ports:
-       - 5000:80
-     networks:
-       - network 
-    
- networks:
-   network:
-     driver: bridge
+  dash-app:
+    restart: always
+    build: .
+    container_name: 'dash-app'
+    ports:
+      - "5050:5050"
+    working_dir: '/root'
+    tty: true
+    volumes:
+      - ./src:/root/src/
+      - ./zshrc:/root/.zshrc
